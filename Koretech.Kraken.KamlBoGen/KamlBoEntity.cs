@@ -21,6 +21,7 @@ namespace Koretech.Kraken.Kaml {
         public int Length {get;set;}
         public bool IsKey {get;set;}
         public bool IsRequired {get;set;}
+        public bool IsIdentity {get;set;}
         public string? Table {get;set;}
         public string? Column {get;set;}
     }
@@ -29,13 +30,14 @@ namespace Koretech.Kraken.Kaml {
         public string Name {get; set;}
         public string TargetEntity {get;set;}
         public string? TargetDomain {get;set;}
-        public Dictionary<string, string> KeyMap {get;}
-        bool IsToMany {get;set;}
+        public Dictionary<string, string> KeyMap {get; private set;}
+        public bool IsToMany {get;set;}
 
         public KamlEntityRelation(string myName, string myTargetEntity) {
             Name = myName;
             TargetEntity = myTargetEntity;
             KeyMap = new Dictionary<string, string>();
+            IsToMany = false;
         }
     }
 }

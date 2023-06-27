@@ -2,8 +2,7 @@ using System.Xml.Linq;
 
 namespace Koretech.Kraken.Kaml {
     public class KamlBoGen {
-        public KamlBoGen(FileInfo source, DirectoryInfo outPath) 
-        {
+        public KamlBoGen(FileInfo source, DirectoryInfo outPath) {
             SourceKamlBo = source;
             OutputRoot = outPath;
          }
@@ -15,19 +14,37 @@ namespace Koretech.Kraken.Kaml {
         private const string configurationsPath = "Configurations";
         private const string contextsPath = "Contexts";
 
-        private const string NameAt = "Name";
+        private const string NameA = "Name";
+        private const string LabelA = "Label";
+        private const string TypeA = "Type";
+        private const string LengthA = "Length";
+        private const string IsRequiredA = "IsRequired";
+        private const string IsKeyA = "IsKey";
+        private const string IsIdentityA = "IsIdentity";
+        private const string IsFixedLengthA = "IsFixedLength";
+        private const string TableA = "Table";
+        private const string ColumnA = "Column";
+        private const string TargetObjectA = "TargetObject";
+        private const string SourcePropertyA = "SourceProperty";
+        private const string TargetPropertyA = "TargetProperty";
 
-        private const string StringType = "string";
-        private const string DateTimeTime = "datetime";
-        private const string YesNoType = "yesno";
-        private const string IntegerType = "integer";
-        private const string UniqueIdentifierType = "uniqueidentifier";
+
+        private const string BooleanType = "boolean";
         private const string BytesType = "bytes";
+        private const string CharacterType = "character";
+        private const string DateType = "date";
+        private const string DateTimeType = "datetime";
+        private const string DecimalType = "decimal";
+        private const string DoubleType = "double";
+        private const string IntegerType = "integer";
+        private const string MoneyType = "money";
+        private const string UniqueIdentifierType = "uniqueidentifier";
+        private const string NCharacterType = "widecharacter";
+        private const string YesNoType = "yesno";
 
         private const string ObjectNameDef = "DefaultObjectName";
 
-        public void Generate()
-        {
+        public void Generate() {
             // First create the output directories if they don't exist
             OutputRoot.Create();
             OutputRoot.CreateSubdirectory(entitiesPath);
@@ -42,7 +59,8 @@ namespace Koretech.Kraken.Kaml {
             foreach(var bo in boElements) {
                 Console.WriteLine($"Found object {bo.Attribute("Name")?.Value}");
                 KamlBoEntity entity = ParseKamlBoEntity(bo);
-                CreateEntityFile(bo);
+                CreateEntityFile(entity);
+                //CreateConfigurationFile(entity);
             }
 
             KamlBoEntity ParseKamlBoEntity(XElement boEl) {
@@ -57,25 +75,43 @@ namespace Koretech.Kraken.Kaml {
                         if(string.Equals(propertyEl.Name.LocalName, "BoundProperty"))
                         {
                             KamlEntityProperty prop = new() {
-                                Label = propertyEl.Attribute("Label")?.Value,
-                                DataType = propertyEl.Attribute("Type")?.Value,
-                                Length = propertyEl.Attribute("Length")?.Value.AsInteger() ?? 0,
-                                IsKey = propertyEl.Attribute("IsKey")?.Value.AsBoolean() ?? false
-                            }
-                            prop.Label = propertyEl.Attribute("Label")?.Value;
-                            prop.DataType = propertyEl.Attribute("Type")?.Value;
+                                Name = propertyEl.Attribute(NameA)?.Value,
+                                Label = propertyEl.Attribute(LabelA)?.Value,
+                                DataType = propertyEl.Attribute(TypeA)?.Value,
+                                Length = propertyEl.Attribute(LengthA)?.Value.AsInteger() ?? 0,
+                                IsKey = propertyEl.Attribute(IsKeyA)?.Value.AsBoolean() ?? false,
+                                IsRequired = propertyEl.Attribute(IsRequiredA)?.Value.AsBoolean() ?? false,
+                                IsIdentity = propertyEl.Attribute(IsIdentityA)?.Value.AsBoolean() ?? false,
+                                Table = propertyEl.Attribute(TableA)?.Value ?? tableName,
+                                Column = propertyEl.Attribute(ColumnA)?.Value
+                            };
+                            entity.Properties.Add(prop);
                         }
                     }
                 }
-
-
+                var relationsEl = boEl.Element("Relations");
+                if(relationsEl != null) {
+                    foreach(var relationEl in relationsEl.Elements()) {
+                        string relName = relationEl.Attribute(NameA)?.Value ?? "?Name?";
+                        string target = relationEl.Attribute(TargetObjectA)?.Value ?? "?TargetObject?";
+                        bool isToMany = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToMany");
+                        KamlEntityRelation relation = new KamlEntityRelation(relName, target);
+                        relation.IsToMany = isToMany;
+                        var keyMapEls = relationEl.Element("KeyMap");
+                        if(keyMapEls != null) {
+                            foreach(var keyMapEl in keyMapEls.Elements()) {
+                                relation.KeyMap.Add(keyMapEl.Attribute(SourcePropertyA)?.Value, keyMapEl.Attribute(TargetPropertyA)?.Value);
+                            }
+                        }
+                        entity.Relations.Add(relation);
+                    }
+                }
                 return entity;
             }
         }
 
-        public void CreateEntityFile(XElement businessObjectEl) 
-        {
-            string objectName = businessObjectEl.Attribute(NameAt)?.Value ?? ObjectNameDef;
+        public void CreateEntityFile(KamlBoEntity entity) {
+            string objectName = entity.Name;
             string sourceFileName = Path.Combine(
                 Path.Combine(OutputRoot.FullName, entitiesPath), $"{objectName}Entity.cs");
             if(File.Exists(sourceFileName)) 
@@ -92,55 +128,45 @@ namespace Koretech.Kraken.Kaml {
             writer.WriteLine("\t{");
             writer.WriteLine("\t");
             // Properties
-            var propertiesEl = businessObjectEl.Element("Properties");
-            if(propertiesEl != null)
-            {
-                foreach(var propertyEl in propertiesEl.Elements()) 
+            foreach(var property in entity.Properties) {
+                if(string.Equals(property.DataType, CharacterType, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    if(string.Equals(propertyEl.Name.LocalName, "BoundProperty"))
-                    {
-                        string? elType = propertyEl.Attribute("Type")?.Value;
-                        if(string.Equals(elType, "character", StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            WriteStringProperty(propertyEl, writer);
-                        }
-                        else if(string.Equals(elType, "datetime", StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            WriteDateTimeProperty(propertyEl, writer);
-                        }
-                        else if(string.Equals(elType, YesNoType, StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            WriteStringProperty(propertyEl, writer);
-                        }
-                        else if(string.Equals(elType, IntegerType, StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            WriteIntegerProperty(propertyEl, writer);
-                        }
-                        else if(string.Equals(elType, UniqueIdentifierType, StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            WriteUuidProperty(propertyEl, writer);
-                        }
-                        else if(string.Equals(elType, BytesType, StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            WriteBytesProperty(propertyEl, writer);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"{objectName} has property {propertyEl.Attribute(NameAt)} with unknown type {elType}");
-                        }
-                    }
+                    WriteStringProperty(property, writer);
+                }
+                else if(string.Equals(property.DataType, DateTimeType, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteDateTimeProperty(property, writer);
+                }
+                else if(string.Equals(property.DataType, YesNoType, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteStringProperty(property, writer);
+                }
+                else if(string.Equals(property.DataType, IntegerType, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteIntegerProperty(property, writer);
+                }
+                    else if(string.Equals(property.DataType, UniqueIdentifierType, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteUuidProperty(property, writer);
+                }
+                else if(string.Equals(property.DataType, BytesType, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteBytesProperty(property, writer);
+                }
+                else
+                {
+                    Console.WriteLine($"{objectName} has property {property.Name} with unknown type {property.DataType}");
                 }
             }
-            // Relations
-            var relationsEl = businessObjectEl.Element("Relations");
-            if(relationsEl != null) 
-            {
-                foreach(var relationEl in relationsEl.Elements())
-                {
-                    
+
+            // relations
+            foreach(var rel in entity.Relations) {
+                if(rel.IsToMany) {
+                    WriteToManyRelationProperty(rel, writer);
+                } else {
+                    WriteToOneRelationProperty(rel, writer);
                 }
             }
-            
 
             writer.WriteLine("\t}");
             writer.WriteLine("}");
@@ -170,60 +196,69 @@ namespace Koretech.Kraken.Kaml {
             return sizeValue;
         }
 
-        private void WriteStringProperty(XElement propertyEl, StreamWriter writer)
+        private void WriteStringProperty(KamlEntityProperty property, StreamWriter writer)
         {
-            bool isNullable = getNullable(propertyEl);
-            string nullableChar = isNullable ? "?" : string.Empty;
-            writer.Write($"\t\tpublic string{nullableChar} {propertyEl.Attribute(NameAt)?.Value}");
+            string nullableChar = property.IsRequired ? string.Empty : "?";
+            writer.Write($"\t\tpublic string{nullableChar} {property.Name}");
             writer.Write(" {get; set;}");
-            if(!isNullable)
+            if(property.IsRequired)
             {
                 writer.Write(" = string.Empty;");
             }
             writer.WriteLine();
         }
 
-        private void WriteDateTimeProperty(XElement propertyEl, StreamWriter writer)
+        private void WriteDateTimeProperty(KamlEntityProperty property, StreamWriter writer)
         {
-            bool isNullable = getNullable(propertyEl);
-            string nullableChar = isNullable ? "?" : string.Empty;
-            writer.Write($"\t\tpublic DateTime{nullableChar} {propertyEl.Attribute(NameAt)?.Value}");
+            string nullableChar = property.IsRequired ? string.Empty : "?";
+            writer.Write($"\t\tpublic DateTime{nullableChar} {property.Name}");
             writer.Write(" {get; set;}");
-            if(!isNullable)
+            if(property.IsRequired)
             {
                 writer.Write(" = DateTime.Now;");
             }
             writer.WriteLine();
         }
 
-        private void WriteIntegerProperty(XElement propertyEl, StreamWriter writer)
+        private void WriteIntegerProperty(KamlEntityProperty property, StreamWriter writer)
         {
-            bool isNullable = getNullable(propertyEl);
-            string nullableChar = isNullable ? "?" : string.Empty;
-            writer.Write($"\t\tpublic int{nullableChar} {propertyEl.Attribute(NameAt)?.Value}");
+            string nullableChar = property.IsRequired ? string.Empty : "?";
+            writer.Write($"\t\tpublic int{nullableChar} {property.Name}");
             writer.Write(" {get; set;}");
             writer.WriteLine();
         }
 
-        private void WriteUuidProperty(XElement propertyEl, StreamWriter writer)
+        private void WriteUuidProperty(KamlEntityProperty property, StreamWriter writer)
         {
-            bool isNullable = getNullable(propertyEl);
-            string nullableChar = isNullable ? "?" : string.Empty;
-            writer.Write($"\t\tpublic Guid{nullableChar} {propertyEl.Attribute(NameAt)?.Value}");
+            string nullableChar = property.IsRequired ? string.Empty : "?";
+            writer.Write($"\t\tpublic Guid{nullableChar} {property.Name}");
             writer.Write(" {get; set;}");
             writer.WriteLine();
         }
 
-        private void WriteBytesProperty(XElement propertyEl, StreamWriter writer)
+        private void WriteBytesProperty(KamlEntityProperty property, StreamWriter writer)
         {
-            bool isNullable = getNullable(propertyEl);
-            string nullableChar = isNullable ? "?" : string.Empty;
-            writer.Write($"\t\tpublic byte[]{nullableChar} {propertyEl.Attribute(NameAt)?.Value}");
+            string nullableChar = property.IsRequired ? string.Empty : "?";
+            writer.Write($"\t\tpublic byte[]{nullableChar} {property.Name}");
             writer.Write(" {get; set;}");
-            if(!isNullable)
+            if(property.IsRequired)
             {
-                writer.Write($" = new byte[{getElementSize(propertyEl)}];");
+                writer.Write($" = new byte[{property.Length}];");
             }   
+            writer.WriteLine();
+        }
+
+        private void WriteToManyRelationProperty(KamlEntityRelation relation , StreamWriter writer) {
+            string targetEntityType = $"{relation.TargetEntity}Entity";
+            writer.Write($"\t\tpublic IList<{targetEntityType}> {relation.Name} {{get; set;}}");
+            writer.Write($" = new List<{targetEntityType}>();  // Navigation property to child {targetEntityType}");
+            writer.WriteLine();
+        }
+
+        private void WriteToOneRelationProperty(KamlEntityRelation relation , StreamWriter writer) {
+            string targetEntityType = $"{relation.TargetEntity}Entity";
+            writer.Write($"\t\tpublic {targetEntityType} {relation.Name} {{get; set;}}");
+            writer.Write($" = new();  // Navigation property to parent {targetEntityType}");
             writer.WriteLine();
         }
 
