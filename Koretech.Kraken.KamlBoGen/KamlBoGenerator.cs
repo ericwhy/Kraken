@@ -26,6 +26,7 @@ namespace Koretech.Kraken.Kaml {
         private const string ColumnA = "Column";
         private const string TargetObjectA = "TargetObject";
         private const string SourcePropertyA = "SourceProperty";
+        private const string TargetDomainA = "TargetDomain";
         private const string TargetPropertyA = "TargetProperty";
 
 
@@ -93,10 +94,12 @@ namespace Koretech.Kraken.Kaml {
                 if(relationsEl != null) {
                     foreach(var relationEl in relationsEl.Elements()) {
                         string relName = relationEl.Attribute(NameA)?.Value ?? "?Name?";
+                        string? targetDomain = relationEl.Attribute(TargetDomainA)?.Value;
                         string target = relationEl.Attribute(TargetObjectA)?.Value ?? "?TargetObject?";
                         bool isToMany = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToMany");
                         KamlEntityRelation relation = new KamlEntityRelation(relName, target);
                         relation.IsToMany = isToMany;
+                        relation.TargetDomain = targetDomain;
                         var keyMapEls = relationEl.Element("KeyMap");
                         if(keyMapEls != null) {
                             foreach(var keyMapEl in keyMapEls.Elements()) {
@@ -161,10 +164,13 @@ namespace Koretech.Kraken.Kaml {
 
             // relations
             foreach(var rel in entity.Relations) {
-                if(rel.IsToMany) {
-                    WriteToManyRelationProperty(rel, writer);
-                } else {
-                    WriteToOneRelationProperty(rel, writer);
+                // Not supporting inter-domain relationships at this time
+                if(string.IsNullOrEmpty(rel.TargetDomain)) {
+                    if(rel.IsToMany) {
+                        WriteToManyRelationProperty(rel, writer);
+                    } else {
+                        WriteToOneRelationProperty(rel, writer);
+                    }
                 }
             }
 
@@ -261,6 +267,32 @@ namespace Koretech.Kraken.Kaml {
             writer.Write($" = new();  // Navigation property to parent {targetEntityType}");
             writer.WriteLine();
         }
+
+        private void CreateEntityConfigurationFile(KamlBoEntity entity) {
+            string objectName = entity.Name;
+            string sourceFileName = Path.Combine(
+                Path.Combine(OutputRoot.FullName, configurationsPath), $"{objectName}EntityTypeConfiguration.cs");
+            if(File.Exists(sourceFileName)) 
+            {
+                File.Delete(sourceFileName);
+            }
+            var writer = File.CreateText(sourceFileName);
+            writer.WriteLine("//");
+            writer.WriteLine("// Created by Kraken KAML BO Generator");
+            writer.WriteLine("//");
+            writer.WriteLine();
+            writer.WriteLine("using Koretech.Kraken.Data;");
+            writer.WriteLine("using Microsoft.EntityFrameworkCore;");
+            writer.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
+            writer.WriteLine("using System;");
+            writer.WriteLine();
+            writer.WriteLine("namespace Koretech.Kraken.Data.Configuration");
+            writer.WriteLine("{");
+            writer.WriteLine($"\tpublic class {objectName}Entity");
+            writer.WriteLine("\t{");
+            writer.WriteLine("\t");
+        }
+
 
     }
 }

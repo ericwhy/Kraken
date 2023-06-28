@@ -19,22 +19,22 @@
         </Relation>
       </Relations>
       <Properties>
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" Required="true" Column="ks_user_id" />
+        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
         <BoundProperty Name="DisplayName" Label="Display Name" Type="character" Length="750" Column="display_name" />
-        <BoundProperty Name="EmailAddress" Label="Email Address" Type="character" Length="750" Required="true" Column="email_address" />
+        <BoundProperty Name="EmailAddress" Label="Email Address" Type="character" Length="750" IsRequired="true" Column="email_address" />
         <BoundProperty Name="PasswordHints" Label="Password Hints" Type="character" Length="30" Column="password_hints" />
         <BoundProperty Name="Password" Label="Password" Type="character" Length="256" Column="password" />
         <BoundProperty Name="PasswordSalt" Label="Password Salt" Type="character" Length="256" Column="password_salt" />
-        <BoundProperty Name="PasswordDt" Label="Password Date" Type="datetime" Length="23" Required="true" Column="password_dt" />
-        <BoundProperty Name="AllowAccessFlg" Label="Allow Access" Type="yesno" Length="1" Required="true" Column="allow_access_flg" >
+        <BoundProperty Name="PasswordDt" Label="Password Date" Type="datetime" Length="23" IsRequired="true" Column="password_dt" />
+        <BoundProperty Name="AllowAccessFlg" Label="Allow Access" Type="yesno" Length="1" IsRequired="true" Column="allow_access_flg" >
           <Enumeration Name="AllowAccessFlgs">
             <EnumeratedValue Value="Y" Label="Yes"/>
             <EnumeratedValue Value="N" Label="No"/>
           </Enumeration>
         </BoundProperty>
-        <BoundProperty Name="IntegratedAuth" Label="Integrated Auth" Type="yesno" Length="1" Required="true" Column="integrated_auth" />
-        <BoundProperty Name="AuthPrompt" Label="Auth Prompt" Type="yesno" Length="1" Required="true" Column="auth_prompt" />
-        <BoundProperty Name="PwresetFlg" Label="Pwreset" Type="yesno" Length="1" Required="true" Column="pwreset_flg" />
+        <BoundProperty Name="IntegratedAuth" Label="Integrated Auth" Type="yesno" Length="1" IsRequired="true" Column="integrated_auth" />
+        <BoundProperty Name="AuthPrompt" Label="Auth Prompt" Type="yesno" Length="1" IsRequired="true" Column="auth_prompt" />
+        <BoundProperty Name="PwresetFlg" Label="Pwreset" Type="yesno" Length="1" IsRequired="true" Column="pwreset_flg" />
         <BoundProperty Name="FailedLoginCnt" Label="Failed Login Cnt" Type="integer" DefaultValue="0" Length="3" Column="failed_login_cnt" />
         <BoundProperty Name="FailedLoginDt" Label="Failed Login Date" Type="datetime" Length="23" Column="failed_login_dt" />
       </Properties>
@@ -48,8 +48,8 @@
         </Relation>
       </Relations>
       <Properties>
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" Required="true" Column="ks_user_id" />
-        <BoundProperty Name="FailDt" Label="Fail Date" Type="datetime" Length="23" IsKey="true" Required="true" Column="fail_dt" />
+        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
+        <BoundProperty Name="FailDt" Label="Fail Date" Type="datetime" Length="23" IsKey="true" IsRequired="true" Column="fail_dt" />
       </Properties>
     </BusinessObject>
     <BusinessObject Name="KsUserRole">
@@ -64,10 +64,10 @@
         </Relation>
       </Relations>
       <Properties>
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" Required="true" Column="ks_user_id" />
-        <BoundProperty Name="ResourceType" Label="Resource Type" Type="character" Length="20" IsKey="true" Required="true" Column="resource_type" />
-        <BoundProperty Name="ResourceName" Label="Resource Name" Type="character" Length="20" IsKey="true" Required="true" Column="resource_name" />
-        <BoundProperty Name="RoleNo" Label="Role" Type="integer" Length="10" IsKey="true" Required="true" Column="role_no" />
+        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
+        <BoundProperty Name="ResourceType" Label="Resource Type" Type="character" Length="20" IsKey="true" IsRequired="true" Column="resource_type" />
+        <BoundProperty Name="ResourceName" Label="Resource Name" Type="character" Length="20" IsKey="true" IsRequired="true" Column="resource_name" />
+        <BoundProperty Name="RoleNo" Label="Role" Type="integer" Length="10" IsKey="true" IsRequired="true" Column="role_no" />
       </Properties>
     </BusinessObject>
     <BusinessObject Name="PasswordHistory">
@@ -79,10 +79,10 @@
         </Relation>
       </Relations>
       <Properties>
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" Required="true" Column="ks_user_id" />
+        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
         <BoundProperty Name="Password" Label="Password" Type="character" Length="256" IsKey="true" Column="password" />
         <BoundProperty Name="PasswordSalt" Label="Password Salt" Type="character" Length="256" Column="password_salt" />
-        <BoundProperty Name="CreateDt" Label="Create Date" Type="datetime" Length="23" Required="true" Column="create_dt" />
+        <BoundProperty Name="CreateDt" Label="Create Date" Type="datetime" Length="23" IsRequired="true" Column="create_dt" />
       </Properties>
     </BusinessObject>
     <BusinessObject Name="KsUserToken">
@@ -94,11 +94,11 @@
         </Relation>
       </Relations>
       <Properties>
-        <BoundProperty Name="TokenNo" Label="Token" Type="integer" Length="10" IsKey="true" IsIdentity="true" Required="true" Column="token_no" />
-        <BoundProperty Name="Selector" Label="Selector" Type="uniqueidentifier" Length="16" Required="true" Column="selector" />
-        <BoundProperty Name="ValidatorHash" Label="Validator Hash" Type="bytes" Length="32" Required="true" Column="validator_hash" />
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" Required="true" Column="ks_user_id" />
-        <BoundProperty Name="ExpirationDt" Label="Expiration Date" Type="datetime" Length="23" Required="true" Column="expiration_dt" />
+        <BoundProperty Name="TokenNo" Label="Token" Type="integer" Length="10" IsKey="true" IsIdentity="true" IsRequired="true" Column="token_no" />
+        <BoundProperty Name="Selector" Label="Selector" Type="uniqueidentifier" Length="16" IsRequired="true" Column="selector" />
+        <BoundProperty Name="ValidatorHash" Label="Validator Hash" Type="bytes" Length="32" IsRequired="true" Column="validator_hash" />
+        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsRequired="true" Column="ks_user_id" />
+        <BoundProperty Name="ExpirationDt" Label="Expiration Date" Type="datetime" Length="23" IsRequired="true" Column="expiration_dt" />
       </Properties>
     </BusinessObject>
   </BusinessObjects>

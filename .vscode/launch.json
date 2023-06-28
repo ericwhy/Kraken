@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Koretech.Kraken.KamlBoGen/bin/Debug/net6.0/Koretech.Kraken.KamlBoGen.dll",
-            "args": [],
+            "args": ["--source-file", "../Koretech.Kraken.Data/KsUser.kamlbo", "-o", "../Gen" ],
             "cwd": "${workspaceFolder}/Koretech.Kraken.KamlBoGen",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
