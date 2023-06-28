@@ -11,5 +11,6 @@ namespace Koretech.Kraken.Data
 		public string? ResourceName {get; set;}
 		public int? RoleNo {get; set;}
 		public KsUserEntity User {get; set;} = new();  // Navigation property to parent KsUserEntity
+		public KsRoleUserEntity Role {get; set;} = new();  // Navigation property to parent KsRoleUserEntity
 	}
 }
