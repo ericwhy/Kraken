@@ -32,15 +32,15 @@ class Program
             Console.WriteLine("Specified file does not exist!");
         }
         if(outputDirectory == null) {
-            Console.WriteLine("Output directory was not specified, using current directory");
+            outputDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
+            Console.WriteLine($"Output directory was not specified, using current directory: {outputDirectory.FullName}");
         } else {
             Console.WriteLine($"Output directory is {outputDirectory.FullName}");
             if(!outputDirectory.Exists) {
                 Console.WriteLine("Output directory does not exist!");
             }
         }
-        var output = outputDirectory ?? new DirectoryInfo(Directory.GetCurrentDirectory());
-        KamlBoGen gen = new(kamlSource, output);
+        KamlBoGen gen = new(kamlSource, outputDirectory);
         gen.Generate();
     }
 }
