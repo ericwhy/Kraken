@@ -57,21 +57,29 @@ namespace Koretech.Kraken.Data.Configuration
 			typeBuilder.Property(e => e.AllowAccessFlg)
 				.HasMaxLength(1)
 				.IsUnicode(false)
+				.HasDefaultValueSql("('N')")
+				.IsFixedLength()
 				.HasColumnName(allow_access_flg);
 
 			typeBuilder.Property(e => e.IntegratedAuth)
 				.HasMaxLength(1)
 				.IsUnicode(false)
+				.HasDefaultValueSql("('N')")
+				.IsFixedLength()
 				.HasColumnName(integrated_auth);
 
 			typeBuilder.Property(e => e.AuthPrompt)
 				.HasMaxLength(1)
 				.IsUnicode(false)
+				.HasDefaultValueSql("('N')")
+				.IsFixedLength()
 				.HasColumnName(auth_prompt);
 
 			typeBuilder.Property(e => e.PwresetFlg)
 				.HasMaxLength(1)
 				.IsUnicode(false)
+				.HasDefaultValueSql("('N')")
+				.IsFixedLength()
 				.HasColumnName(pwreset_flg);
 
 			typeBuilder.Property(e => e.FailedLoginCnt)

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Xml.Linq;
 
 namespace Koretech.Kraken.Kaml {
@@ -57,65 +58,89 @@ namespace Koretech.Kraken.Kaml {
 
             // Get the BusinessObjects
             var boElements = from e in kamlRoot.Descendants("BusinessObject") select e;
-            foreach (var bo in boElements) {
+            List<KamlBoEntity> entities = new();
+            foreach (var bo in boElements) 
+            {
+                Console.WriteLine();
                 Console.WriteLine($"Found object {bo.Attribute("Name")?.Value}");
                 KamlBoEntity entity = ParseKamlBoEntity(bo);
+                entities.Add(entity);
                 CreateEntityFile(entity);
                 CreateEntityConfigurationFile(entity);
             }
+            Console.WriteLine();
+            CreateContextFile(entities);
+        }
 
-            KamlBoEntity ParseKamlBoEntity(XElement boEl) {
-                string name = boEl.Attribute("Name")?.Value ?? "?_?";
-                string tableName = boEl.Element("Data")?.Attribute("Table")?.Value ?? "?_?";
-                var entity = new KamlBoEntity(name, tableName);
-                // Get all the properties
-                var propertiesEl = boEl.Element("Properties");
-                if (propertiesEl != null) {
-                    foreach (var propertyEl in propertiesEl.Elements())
+        private KamlBoEntity ParseKamlBoEntity(XElement boEl)
+        {
+            string name = boEl.Attribute("Name")?.Value ?? "?_?";
+            string tableName = boEl.Element("Data")?.Attribute("Table")?.Value ?? "?_?";
+            var entity = new KamlBoEntity(name, tableName);
+            
+            // Get all the properties
+            var propertiesEl = boEl.Element("Properties");
+            if (propertiesEl != null)
+            {
+                foreach (var propertyEl in propertiesEl.Elements())
+                {
+                    if (string.Equals(propertyEl.Name.LocalName, "BoundProperty"))
                     {
-                        if (string.Equals(propertyEl.Name.LocalName, "BoundProperty"))
+                        KamlEntityProperty prop = new()
                         {
-                            KamlEntityProperty prop = new() {
-                                Name = propertyEl.Attribute(NameA)?.Value,
-                                Label = propertyEl.Attribute(LabelA)?.Value,
-                                DataType = propertyEl.Attribute(TypeA)?.Value,
-                                Length = propertyEl.Attribute(LengthA)?.Value.AsInteger() ?? 0,
-                                IsKey = propertyEl.Attribute(IsKeyA)?.Value.AsBoolean() ?? false,
-                                IsRequired = propertyEl.Attribute(IsRequiredA)?.Value.AsBoolean() ?? false,
-                                IsIdentity = propertyEl.Attribute(IsIdentityA)?.Value.AsBoolean() ?? false,
-                                Table = propertyEl.Attribute(TableA)?.Value ?? tableName,
-                                Column = propertyEl.Attribute(ColumnA)?.Value
-                            };
-                            entity.Properties.Add(prop);
-                        }
+                            Name = propertyEl.Attribute(NameA)?.Value,
+                            Label = propertyEl.Attribute(LabelA)?.Value,
+                            DataType = propertyEl.Attribute(TypeA)?.Value,
+                            Length = propertyEl.Attribute(LengthA)?.Value.AsInteger() ?? 0,
+                            IsKey = propertyEl.Attribute(IsKeyA)?.Value.AsBoolean() ?? false,
+                            IsRequired = propertyEl.Attribute(IsRequiredA)?.Value.AsBoolean() ?? false,
+                            IsIdentity = propertyEl.Attribute(IsIdentityA)?.Value.AsBoolean() ?? false,
+                            Table = propertyEl.Attribute(TableA)?.Value ?? tableName,
+                            Column = propertyEl.Attribute(ColumnA)?.Value
+                        };
+                        entity.Properties.Add(prop);
                     }
                 }
-                var relationsEl = boEl.Element("Relations");
-                if (relationsEl != null) {
-                    foreach (var relationEl in relationsEl.Elements()) {
-                        string relName = relationEl.Attribute(NameA)?.Value ?? "?Name?";
-                        string? targetDomain = relationEl.Attribute(TargetDomainA)?.Value;
-                        string target = relationEl.Attribute(TargetObjectA)?.Value ?? "?TargetObject?";
-                        bool isToMany = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToMany");
-                        KamlEntityRelation relation = new KamlEntityRelation(relName, target);
-                        relation.IsToMany = isToMany;
-                        relation.TargetDomain = targetDomain;
-                        var keyMapEls = relationEl.Element("KeyMap");
-                        if (keyMapEls != null) {
-                            foreach (var keyMapEl in keyMapEls.Elements()) {
-                                relation.KeyMap.Add(keyMapEl.Attribute(SourcePropertyA)?.Value, keyMapEl.Attribute(TargetPropertyA)?.Value);
-                            }
-                        }
-                        entity.Relations.Add(relation);
-                    }
-                }
-                return entity;
             }
+            
+            // Get all the relationships
+            var relationsEl = boEl.Element("Relations");
+            if (relationsEl != null)
+            {
+                foreach (var relationEl in relationsEl.Elements())
+                {
+                    string relName = relationEl.Attribute(NameA)?.Value ?? "?Name?";
+                    string? targetDomain = relationEl.Attribute(TargetDomainA)?.Value;
+                    string target = relationEl.Attribute(TargetObjectA)?.Value ?? "?TargetObject?";
+                    bool isToMany = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToMany");
+                    bool isToOne = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToOne");
+                    bool isToOwnerMany = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToOwnerMany");
+                    bool isToOwnerOne = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToOwnerOne");
+                    KamlEntityRelation relation = new KamlEntityRelation(relName, target)
+                    {
+                        IsToMany = isToMany,
+                        IsToOne = isToOne,
+                        IsToOwnerMany = isToOwnerMany,
+                        IsToOwnerOne = isToOwnerOne,
+                        TargetDomain = targetDomain
+                    };
+                    var keyMapEls = relationEl.Element("KeyMap");
+                    if (keyMapEls != null)
+                    {
+                        foreach (var keyMapEl in keyMapEls.Elements())
+                        {
+                            relation.KeyMap.Add(keyMapEl.Attribute(SourcePropertyA)?.Value, keyMapEl.Attribute(TargetPropertyA)?.Value);
+                        }
+                    }
+                    entity.Relations.Add(relation);
+                }
+            }
+            return entity;
         }
 
         #region Entity File
 
-        public void CreateEntityFile(KamlBoEntity entity) {
+        private void CreateEntityFile(KamlBoEntity entity) {
             string objectName = entity.Name;
             string sourceFileName = Path.Combine(
                 Path.Combine(OutputRoot.FullName, entitiesPath), $"{objectName}Entity.cs");
@@ -132,6 +157,7 @@ namespace Koretech.Kraken.Kaml {
             writer.WriteLine($"\tpublic class {objectName}Entity");
             writer.WriteLine("\t{");
             writer.WriteLine("\t");
+
             // Properties
             foreach (var property in entity.Properties) {
                 if (string.Equals(property.DataType, CharacterType, StringComparison.CurrentCultureIgnoreCase))
@@ -180,6 +206,7 @@ namespace Koretech.Kraken.Kaml {
             writer.WriteLine("}");
             writer.Flush();
             writer.Close();
+            Console.WriteLine($"File {sourceFileName} generated.");
         }
 
         private bool getNullable(XElement prop)
@@ -274,6 +301,10 @@ namespace Koretech.Kraken.Kaml {
 
         #region Configuration File
 
+        /// <summary>
+        /// Generates an EF EntityTypeConfiguration class from a BO specification.
+        /// </summary>
+        /// <param name="entity">BO specification</param>
         private void CreateEntityConfigurationFile(KamlBoEntity entity) {
             string objectName = entity.Name;
             string tableName = entity.TableName;
@@ -319,7 +350,7 @@ namespace Koretech.Kraken.Kaml {
                 }
                 else if (string.Equals(property.DataType, YesNoType, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    WriteStringColumn(property, writer);
+                    WriteYesNoColumn(property, writer);
                 }
                 else if (string.Equals(property.DataType, IntegerType, StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -345,6 +376,7 @@ namespace Koretech.Kraken.Kaml {
 
             writer.Flush();
             writer.Close();
+            Console.WriteLine($"File {sourceFileName} generated.");
         }
 
         private void WriteStringColumn (KamlEntityProperty property, StreamWriter writer)
@@ -401,5 +433,72 @@ namespace Koretech.Kraken.Kaml {
         }
 
         #endregion Configuration File
+
+        #region Context File
+
+        /// <summary>
+        /// Generates an EF Context class from a set of kamlbo BO specifications.
+        /// </summary>
+        /// <param name="entities">All entity specifications from the kamlbo file.</param>
+        private void CreateContextFile(List<KamlBoEntity> entities)
+        {
+            KamlBoEntity primaryObject = entities
+                .Where(e => e.IsDomainPrimary)
+                .Single();
+            string primaryObjectName = primaryObject.Name;
+            IEnumerable<string> ownedObjectNames = entities
+                .Where(e => !e.IsDomainPrimary)
+                .Select(e => e.Name);
+
+            string sourceFileName = Path.Combine(
+                Path.Combine(OutputRoot.FullName, contextsPath), $"{primaryObjectName}Context.cs");
+            if (File.Exists(sourceFileName))
+            {
+                File.Delete(sourceFileName);
+            }
+
+            var writer = File.CreateText(sourceFileName);
+            writer.WriteLine("//");
+            writer.WriteLine("// Created by Kraken KAML BO Generator");
+            writer.WriteLine("//");
+            writer.WriteLine();
+            writer.WriteLine("using Koretech.Kraken.Data.Configurations;");
+            writer.WriteLine("using Koretech.Kraken.Data.Entity;");
+            writer.WriteLine("using Microsoft.EntityFrameworkCore;");
+            writer.WriteLine();
+            writer.WriteLine("namespace Koretech.Kraken.Data.Contexts");
+            writer.WriteLine("{");
+            writer.WriteLine($"\tpublic class {primaryObjectName}Context : DbContext");
+            writer.WriteLine("\t{");
+            writer.WriteLine($"\t\tpublic {primaryObjectName}Context() {{ }}");
+            writer.WriteLine("\t\t");
+            writer.WriteLine($"\t\tpublic {primaryObjectName}Context(DbContextOptions<{primaryObjectName}Context> options) : base(options) {{ }}");
+            writer.WriteLine();
+            
+            writer.WriteLine($"\t\tpublic virtual DbSet<{primaryObjectName}Entity> {primaryObjectName}s {{ get; set; }}");
+            foreach(string objectName in ownedObjectNames)
+            {
+                writer.WriteLine($"\t\tpublic virtual DbSet<{objectName}Entity> {objectName}s {{ get; set; }}");
+            }
+            writer.WriteLine();
+
+            writer.WriteLine("\t\tprotected override void OnModelCreating(ModelBuilder modelBuilder)");
+            writer.WriteLine("\t\t{");
+            writer.WriteLine($"\t\t\tnew {primaryObjectName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{primaryObjectName}Entity>());");
+            foreach (string objectName in ownedObjectNames)
+            {
+                writer.WriteLine($"\t\t\tnew {objectName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{objectName}Entity>());");
+            }
+            writer.WriteLine("\t\t}");
+
+            writer.WriteLine("\t}");
+            writer.WriteLine("}");
+
+            writer.Flush();
+            writer.Close();
+            Console.WriteLine($"File {sourceFileName} generated.");
+        }
+
+        #endregion Context File
     }
 }
