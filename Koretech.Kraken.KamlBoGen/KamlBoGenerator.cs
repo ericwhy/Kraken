@@ -7,13 +7,14 @@ namespace Koretech.Kraken.Kaml {
             SourceKamlBo = source;
             OutputRoot = outPath;
         }
-        public FileInfo SourceKamlBo { get; set; }
-        public DirectoryInfo OutputRoot { get; set; }
-        private List<KamlBoEntity> entities = new();
+
+        public FileInfo SourceKamlBo { get; private set; }
+        public DirectoryInfo OutputRoot { get; private set; }
 
         private const string entitiesPath = "Entities";
         private const string configurationsPath = "Configurations";
         private const string contextsPath = "Contexts";
+        private const string businessObjectsPath = "BusinessObjects";
 
         private const string NameA = "Name";
         private const string LabelA = "Label";
@@ -30,7 +31,6 @@ namespace Koretech.Kraken.Kaml {
         private const string TargetDomainA = "TargetDomain";
         private const string TargetPropertyA = "TargetProperty";
 
-
         private const string BooleanType = "boolean";
         private const string BytesType = "bytes";
         private const string CharacterType = "character";
@@ -44,6 +44,23 @@ namespace Koretech.Kraken.Kaml {
         private const string NCharacterType = "widecharacter";
         private const string YesNoType = "yesno";
 
+        // Mapping from SQL types to CLR types
+        private readonly Dictionary<string, string> ClrTypes = new()
+        {
+            { BooleanType, "bool" },
+            { BytesType, "byte[]" },
+            { CharacterType, "string" },
+            { DateType, "DateTime" },
+            { DateTimeType, "DateTime" },
+            { DecimalType, "decimal" },
+            { DoubleType, "double" },
+            { IntegerType, "int" },
+            { MoneyType, "decimal" },
+            { UniqueIdentifierType, "Guid" },
+            { NCharacterType, "string" },
+            { YesNoType, "char" }
+        };
+
         private const string ObjectNameDef = "DefaultObjectName";
 
         public void Generate() {
@@ -52,6 +69,7 @@ namespace Koretech.Kraken.Kaml {
             OutputRoot.CreateSubdirectory(entitiesPath);
             OutputRoot.CreateSubdirectory(configurationsPath);
             OutputRoot.CreateSubdirectory(contextsPath);
+            OutputRoot.CreateSubdirectory(businessObjectsPath);
 
             // Read the document
             XElement kamlRoot = XElement.Load(SourceKamlBo.FullName);
@@ -69,7 +87,20 @@ namespace Koretech.Kraken.Kaml {
                 CreateEntityConfigurationFile(entity);
             }
             Console.WriteLine();
-            CreateContextFile(entities);
+            
+            // Determine the domain's primary entity and generate the context
+            KamlBoEntity primaryEntity = entities
+                .Where(e => e.IsDomainPrimary)
+                .Single();
+            CreateContextFile(entities, primaryEntity);
+            Console.WriteLine();
+            
+            // Create the business object POCOs
+            OutputRoot.GetDirectories(businessObjectsPath).Single().CreateSubdirectory(primaryEntity.Name);
+            foreach (KamlBoEntity entity in entities)
+            {
+                CreateBusinessObjectFile(entity, primaryEntity);
+            }
         }
 
         private KamlBoEntity ParseKamlBoEntity(XElement boEl)
@@ -306,10 +337,10 @@ namespace Koretech.Kraken.Kaml {
         /// </summary>
         /// <param name="entity">BO specification</param>
         private void CreateEntityConfigurationFile(KamlBoEntity entity) {
-            string objectName = entity.Name;
+            string entityName = entity.Name;
             string tableName = entity.TableName;
             string sourceFileName = Path.Combine(
-                Path.Combine(OutputRoot.FullName, configurationsPath), $"{objectName}EntityTypeConfiguration.cs");
+                Path.Combine(OutputRoot.FullName, configurationsPath), $"{entityName}EntityTypeConfiguration.cs");
             if (File.Exists(sourceFileName))
             {
                 File.Delete(sourceFileName);
@@ -327,13 +358,13 @@ namespace Koretech.Kraken.Kaml {
             writer.WriteLine();
             writer.WriteLine("namespace Koretech.Kraken.Data.Configuration");
             writer.WriteLine("{");
-            writer.WriteLine($"\tpublic class {objectName}EntityTypeConfiguration : IEntityTypeConfiguration<{objectName}Entity>");
+            writer.WriteLine($"\tpublic class {entityName}EntityTypeConfiguration : IEntityTypeConfiguration<{entityName}Entity>");
             writer.WriteLine("\t{");
-            writer.WriteLine($"\t\tpublic void Configure(EntityTypeBuilder<{objectName}Entity> typeBuilder)");
+            writer.WriteLine($"\t\tpublic void Configure(EntityTypeBuilder<{entityName}Entity> typeBuilder)");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\ttypeBuilder");
-            writer.WriteLine($"\t\t\t\t.ToTable<{objectName}Entity>(\"{tableName}\", \"ks\");\r\n");
-            writer.WriteLine($"\t\t\ttypeBuilder.HasKey(e => e.{objectName}Id)");
+            writer.WriteLine($"\t\t\t\t.ToTable<{entityName}Entity>(\"{tableName}\", \"ks\");\r\n");
+            writer.WriteLine($"\t\t\ttypeBuilder.HasKey(e => e.{entityName}Id)");
             writer.WriteLine($"\t\t\t\t.HasName(\"{tableName}_PK\");");
             writer.WriteLine();
 
@@ -366,7 +397,7 @@ namespace Koretech.Kraken.Kaml {
                 }
                 else
                 {
-                    Console.WriteLine($"{objectName} has property {property.Name} with unknown type {property.DataType}");
+                    Console.WriteLine($"{entityName} has property {property.Name} with unknown type {property.DataType}");
                 }
             }
 
@@ -440,18 +471,16 @@ namespace Koretech.Kraken.Kaml {
         /// Generates an EF Context class from a set of kamlbo BO specifications.
         /// </summary>
         /// <param name="entities">All entity specifications from the kamlbo file.</param>
-        private void CreateContextFile(List<KamlBoEntity> entities)
+        /// <param name="primaryEntity">The primary entity in the business domain.</param>
+        private void CreateContextFile(List<KamlBoEntity> entities, KamlBoEntity primaryEntity)
         {
-            KamlBoEntity primaryObject = entities
-                .Where(e => e.IsDomainPrimary)
-                .Single();
-            string primaryObjectName = primaryObject.Name;
-            IEnumerable<string> ownedObjectNames = entities
+            string primaryEntityName = primaryEntity.Name;
+            IEnumerable<string> ownedEntityNames = entities
                 .Where(e => !e.IsDomainPrimary)
                 .Select(e => e.Name);
 
             string sourceFileName = Path.Combine(
-                Path.Combine(OutputRoot.FullName, contextsPath), $"{primaryObjectName}Context.cs");
+                Path.Combine(OutputRoot.FullName, contextsPath), $"{primaryEntityName}Context.cs");
             if (File.Exists(sourceFileName))
             {
                 File.Delete(sourceFileName);
@@ -468,15 +497,15 @@ namespace Koretech.Kraken.Kaml {
             writer.WriteLine();
             writer.WriteLine("namespace Koretech.Kraken.Data.Contexts");
             writer.WriteLine("{");
-            writer.WriteLine($"\tpublic class {primaryObjectName}Context : DbContext");
+            writer.WriteLine($"\tpublic class {primaryEntityName}Context : DbContext");
             writer.WriteLine("\t{");
-            writer.WriteLine($"\t\tpublic {primaryObjectName}Context() {{ }}");
+            writer.WriteLine($"\t\tpublic {primaryEntityName}Context() {{ }}");
             writer.WriteLine("\t\t");
-            writer.WriteLine($"\t\tpublic {primaryObjectName}Context(DbContextOptions<{primaryObjectName}Context> options) : base(options) {{ }}");
+            writer.WriteLine($"\t\tpublic {primaryEntityName}Context(DbContextOptions<{primaryEntityName}Context> options) : base(options) {{ }}");
             writer.WriteLine();
             
-            writer.WriteLine($"\t\tpublic virtual DbSet<{primaryObjectName}Entity> {primaryObjectName}s {{ get; set; }}");
-            foreach(string objectName in ownedObjectNames)
+            writer.WriteLine($"\t\tpublic virtual DbSet<{primaryEntityName}Entity> {primaryEntityName}s {{ get; set; }}"); //TODO: Fix plural on property naming
+            foreach(string objectName in ownedEntityNames)
             {
                 writer.WriteLine($"\t\tpublic virtual DbSet<{objectName}Entity> {objectName}s {{ get; set; }}");
             }
@@ -484,8 +513,8 @@ namespace Koretech.Kraken.Kaml {
 
             writer.WriteLine("\t\tprotected override void OnModelCreating(ModelBuilder modelBuilder)");
             writer.WriteLine("\t\t{");
-            writer.WriteLine($"\t\t\tnew {primaryObjectName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{primaryObjectName}Entity>());");
-            foreach (string objectName in ownedObjectNames)
+            writer.WriteLine($"\t\t\tnew {primaryEntityName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{primaryEntityName}Entity>());");
+            foreach (string objectName in ownedEntityNames)
             {
                 writer.WriteLine($"\t\t\tnew {objectName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{objectName}Entity>());");
             }
@@ -500,5 +529,71 @@ namespace Koretech.Kraken.Kaml {
         }
 
         #endregion Context File
+
+        #region Business Object File
+
+        /// <summary>
+        /// Generates a business object class a BO specification.
+        /// </summary>
+        /// <param name="entity">BO specification</param>
+        /// <param name="primaryEntity">The primary entity in the business domain.</param>
+        private void CreateBusinessObjectFile(KamlBoEntity entity, KamlBoEntity primaryEntity)
+        {
+            string entityName = entity.Name;
+            string primaryEntityName = primaryEntity.Name;
+            string boFullPath = Path.Combine(OutputRoot.FullName, businessObjectsPath);
+            string domainFullPath = Path.Combine(boFullPath, primaryEntityName);
+            string sourceFileName = Path.Combine(domainFullPath, $"{entityName}.Generated.cs");
+            if (File.Exists(sourceFileName))
+            {
+                File.Delete(sourceFileName);
+            }
+
+            var writer = File.CreateText(sourceFileName);
+            writer.WriteLine("//");
+            writer.WriteLine("// Created by Kraken KAML BO Generator");
+            writer.WriteLine("//");
+            writer.WriteLine();
+            writer.WriteLine("using Koretech.Framework.BusinessObjects;");
+            writer.WriteLine("using Koretech.KommerceServer.BusinessObjects.Utility;");
+            writer.WriteLine("using System.ComponentModel;");
+            writer.WriteLine("using System.Collections;");
+            writer.WriteLine();
+            writer.WriteLine($"namespace Koretech.Kraken.BusinessObjects.{primaryEntityName}");
+            writer.WriteLine("{");
+            writer.WriteLine($"\tpublic class {entityName}Base : BODomainEntity<{entityName}Base>, IDomainObject");
+            writer.WriteLine("\t{");
+
+            // Properties
+            writer.WriteLine("\t\t#region Properties");
+            foreach (KamlEntityProperty property in entity.Properties)
+            {
+                string clrType = ClrTypes[property.DataType];
+
+                writer.WriteLine($"\t\t\tpublic {clrType} {property.Name} {{ get; set; }}");
+                writer.WriteLine();
+            }
+            writer.WriteLine("\t\t#endregion Properties");
+            writer.WriteLine();
+
+            // Relationships
+            writer.WriteLine("\t\t#region Relationships");
+            foreach (KamlEntityRelation relationship in entity.Relations)
+            {
+                writer.WriteLine($"\t\t\tpublic List<{relationship.TargetEntity}> {relationship.Name} = new();");
+                writer.WriteLine();
+            }
+            writer.WriteLine("\t\t#endregion Relationships");
+
+            writer.WriteLine("\t\t}");
+            writer.WriteLine("\t}");
+            writer.WriteLine("}");
+
+            writer.Flush();
+            writer.Close();
+            Console.WriteLine($"File {sourceFileName} generated.");
+        }
+
+        #endregion Business Object File
     }
 }
