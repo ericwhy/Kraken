@@ -22,6 +22,5 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 			public List<KsUser> User = new();
 
 		#endregion Relationships
-		}
 	}
 }
