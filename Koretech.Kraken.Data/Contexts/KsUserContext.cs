@@ -30,8 +30,10 @@ namespace Koretech.Kraken.Data.Contexts
             new KsUserTokenEntityTypeConfiguration().Configure(modelBuilder.Entity<KsUserTokenEntity>());
             new PasswordHistoryEntityTypeConfiguration().Configure(modelBuilder.Entity<PasswordHistoryEntity>());
 
+            modelBuilder.HasDefaultSchema("ks");
             modelBuilder.HasDbFunction(typeof(KsUserContext).GetMethod(nameof(KsUserEntityScope)))
-            .HasName("ks.kssf_scope_ksuser");
+            .HasName("kssf_scope_ksuser")
+            ;
         }
     }
 }
