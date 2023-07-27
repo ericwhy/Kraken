@@ -15,7 +15,11 @@ namespace Koretech.Kraken
                 .Options;
 
             var context = new KsUserContext(contextOptions);
-            var user = context.Users.Where(x=>x.DisplayName.EndsWith("Yarbrough")).FirstOrDefault();
+            var user = (from u in context.Users
+                        join s in context.KsUserEntityScope("keithl@koretech.com", "Koretech.KommerceServer.BusinessObjects.KSUser.KsUser", "Retrieve", null)
+                          on u.KsUserId equals s.KsUserId
+                        select u)
+                        .FirstOrDefault(); //context.Users.Where(x=>x.DisplayName.EndsWith("Yarbrough")).FirstOrDefault();
             user.FailedLoginDt = DateTime.Now;
             context.SaveChanges();
 
