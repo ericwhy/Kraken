@@ -475,3 +475,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+/Gen/BusinessObjects/KsUser/KsUser.Generated.cs
+/Gen/BusinessObjects/KsUser/KsUserLoginFailure.Generated.cs
+/Gen/BusinessObjects/KsUser/KsUserRole.Generated.cs
+/Gen/BusinessObjects/KsUser/KsUserToken.Generated.cs
+/Gen/BusinessObjects/KsUser/PasswordHistory.Generated.cs

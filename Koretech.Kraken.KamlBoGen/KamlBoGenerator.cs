@@ -566,11 +566,11 @@ namespace Koretech.Kraken.Kaml {
 
             // Properties
             writer.WriteLine("\t\t#region Properties");
+            writer.WriteLine();
             foreach (KamlEntityProperty property in entity.Properties)
             {
                 string clrType = ClrTypes[property.DataType];
-
-                writer.WriteLine($"\t\t\tpublic {clrType} {property.Name} {{ get; set; }}");
+                writer.WriteLine($"\t\tpublic {clrType} {property.Name} {{ get; set; }}");
                 writer.WriteLine();
             }
             writer.WriteLine("\t\t#endregion Properties");
@@ -578,9 +578,17 @@ namespace Koretech.Kraken.Kaml {
 
             // Relationships
             writer.WriteLine("\t\t#region Relationships");
+            writer.WriteLine();
             foreach (KamlEntityRelation relationship in entity.Relations)
             {
-                writer.WriteLine($"\t\t\tpublic List<{relationship.TargetEntity}> {relationship.Name} = new();");
+                if (relationship.IsToMany || relationship.IsToOwnerMany)
+                {
+                    writer.WriteLine($"\t\tpublic List<{relationship.TargetEntity}> {relationship.Name} = new();");
+                }
+                else if (relationship.IsToOne || relationship.IsToOwnerOne)
+                {
+                    writer.WriteLine($"\t\tpublic {relationship.TargetEntity} {relationship.Name};");
+                }
                 writer.WriteLine();
             }
             writer.WriteLine("\t\t#endregion Relationships");
