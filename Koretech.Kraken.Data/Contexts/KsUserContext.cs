@@ -15,12 +15,12 @@ namespace Koretech.Kraken.Data.Contexts
         public virtual DbSet<KsUserTokenEntity> UserTokens { get; set; }
         public virtual DbSet<PasswordHistoryEntity> PasswordHistory { get; set; }
 
-        #region Scope functions
+        #region Scope Functions
         
         public IQueryable<KsUserEntity> KsUserEntityScope(string userId, string objectId, string methodName, int? scopeOverride)
             => FromExpression(() => KsUserEntityScope(userId, objectId, methodName, scopeOverride));
         
-        #endregion
+        #endregion Scope Functions
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,8 +32,7 @@ namespace Koretech.Kraken.Data.Contexts
 
             modelBuilder.HasDefaultSchema("ks");
             modelBuilder.HasDbFunction(typeof(KsUserContext).GetMethod(nameof(KsUserEntityScope)))
-            .HasName("kssf_scope_ksuser")
-            ;
+                .HasName("kssf_scope_ksuser");
         }
     }
 }
