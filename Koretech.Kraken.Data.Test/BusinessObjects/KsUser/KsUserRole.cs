@@ -4,16 +4,17 @@
 // DO NOT MODIFY
 //
 
+using Koretech.Kraken.BusinessObjects.KsRole;
 using Koretech.Kraken.Entities.KsUser;
 using System.Collections;
 
 namespace Koretech.Kraken.BusinessObjects.KsUser
 {
 	/// <summary>
-	/// This business object class wraps the domain entity KsUserLoginFailureEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsUserRoleEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public class KsUserLoginFailure
+	public class KsUserRole
 	{
 		#region Static Methods
 
@@ -24,15 +25,17 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		/// </summary>
 		/// <param name="entity">The entity to create a business object from</param>
 		/// <returns>A newly created business object wrapping the provided entity</returns>
-		public static KsUserLoginFailure NewInstance(KsUserLoginFailureEntity entity)
+		public static KsUserRole NewInstance(KsUserRoleEntity entity)
 		{
-			KsUserLoginFailure businessObject = new(entity);
+			KsUserRole businessObject = new(entity);
 
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
 			IList<KsUser> newKsUser = Koretech.Kraken.BusinessObjects.KsUser.KsUser.NewInstance(entity.User);
 			businessObject.User.AddRange(newKsUser);
+
+			businessObject.Role = KsRoleUser.NewInstance(entity.Role);
 
 			return businessObject;
 		}
@@ -44,13 +47,13 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		/// </summary>
 		/// <param name="entities">The entities to create business objects from</param>
 		/// <returns>A newly created business object(s) wrapping the provided entities</returns>
-		public static IList<KsUserLoginFailure> NewInstance(IList<KsUserLoginFailureEntity> entities)
+		public static IList<KsUserRole> NewInstance(IList<KsUserRoleEntity> entities)
 		{
-			List<KsUserLoginFailure> businessObjects = new();
+			List<KsUserRole> businessObjects = new();
 
-			foreach (KsUserLoginFailureEntity entity in entities)
+			foreach (KsUserRoleEntity entity in entities)
 			{
-				KsUserLoginFailure newBusinessObject = new(entity);
+				KsUserRole newBusinessObject = new(entity);
 				businessObjects.Add(newBusinessObject);
 
 				// Recursively create business objects from the entities that have relationships with this one
@@ -58,6 +61,8 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 
 				IList<KsUser> newKsUser = Koretech.Kraken.BusinessObjects.KsUser.KsUser.NewInstance(entity.User);
 				newBusinessObject.User.AddRange(newKsUser);
+
+				newBusinessObject.Role = KsRoleUser.NewInstance(entity.Role);
 			}
 
 			return businessObjects;
@@ -65,18 +70,18 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 
 		#endregion Static Methods
 
-		private KsUserLoginFailureEntity _entity;
+		private KsUserRoleEntity _entity;
 
 		/// <summary>
 		/// Constructor.  Private to force use of the static factory method NewInstance().
 		/// </summary>
 		/// <param name="entity">An entity that provides data for the business object</param>
-		private KsUserLoginFailure(KsUserLoginFailureEntity entity)
+		private KsUserRole(KsUserRoleEntity entity)
 		{
 			_entity = entity;
 		}
 
-		internal KsUserLoginFailureEntity Entity
+		internal KsUserRoleEntity Entity
 		{
 			get => _entity;
 		}
@@ -89,10 +94,22 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 			set => _entity.KsUserId = value;
 		}
 
-		public DateTime FailDt
+		public string ResourceType
 		{
-			get => _entity.FailDt;
-			set => _entity.FailDt = value;
+			get => _entity.ResourceType;
+			set => _entity.ResourceType = value;
+		}
+
+		public string ResourceName
+		{
+			get => _entity.ResourceName;
+			set => _entity.ResourceName = value;
+		}
+
+		public int RoleNo
+		{
+			get => _entity.RoleNo;
+			set => _entity.RoleNo = value;
 		}
 
 		#endregion Entity Properties
@@ -100,6 +117,8 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		#region Relationships
 
 		public List<KsUser> User = new();
+
+		public KsRoleUser Role;
 
 		#endregion Relationships
 

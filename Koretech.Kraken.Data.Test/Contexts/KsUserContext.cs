@@ -3,10 +3,11 @@
 //
 
 using Koretech.Kraken.Data.Configurations;
+using Koretech.Kraken.Entities.KsRole;
 using Koretech.Kraken.Entities.KsUser;
 using Microsoft.EntityFrameworkCore;
 
-namespace Koretech.Kraken.Data
+namespace Koretech.Kraken.Contexts
 {
 	public class KsUserContext : DbContext
 	{
@@ -34,6 +35,9 @@ namespace Koretech.Kraken.Data
 			new KsUserRoleEntityTypeConfiguration().Configure(modelBuilder.Entity<KsUserRoleEntity>());
 			new PasswordHistoryEntityTypeConfiguration().Configure(modelBuilder.Entity<PasswordHistoryEntity>());
 			new KsUserTokenEntityTypeConfiguration().Configure(modelBuilder.Entity<KsUserTokenEntity>());
+
+			// Added by hand.
+			new KsRoleUserEntityTypeConfiguration().Configure(modelBuilder.Entity<KsRoleUserEntity>());
 
 			modelBuilder.HasDefaultSchema("ks");
 			modelBuilder.HasDbFunction(typeof(KsUserContext).GetMethod(nameof(KsUserEntityScope)))

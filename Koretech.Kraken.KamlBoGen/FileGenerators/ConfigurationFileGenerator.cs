@@ -48,130 +48,151 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             _ = DomainRoot ?? throw new InvalidOperationException($"DomainRoot must be set before calling {nameof(CreateConfigurationFile)}");
 
-                string entityName = entity.Name;
-                string tableName = entity.TableName;
-                string sourceFileName = Path.Combine(
-                    Path.Combine(outputRootDirectory.FullName, configurationsPath), $"{entityName}EntityTypeConfiguration.cs");
-                if (File.Exists(sourceFileName))
+            string entityName = entity.Name;
+            string tableName = entity.TableName;
+            string sourceFileName = Path.Combine(
+                Path.Combine(outputRootDirectory.FullName, configurationsPath), $"{entityName}EntityTypeConfiguration.cs");
+            if (File.Exists(sourceFileName))
+            {
+                File.Delete(sourceFileName);
+            }
+
+            var writer = File.CreateText(sourceFileName);
+            writer.WriteLine("//");
+            writer.WriteLine("// Created by Kraken KAML BO Generator");
+            writer.WriteLine("//");
+            writer.WriteLine();
+            writer.WriteLine("using Koretech.Kraken.Entities.KsUser;");
+            writer.WriteLine("using Microsoft.EntityFrameworkCore;");
+            writer.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
+            writer.WriteLine();
+            writer.WriteLine("namespace Koretech.Kraken.Data.Configurations");
+            writer.WriteLine("{");
+            writer.WriteLine($"\tpublic class {entityName}EntityTypeConfiguration : IEntityTypeConfiguration<{entityName}Entity>");
+            writer.WriteLine("\t{");
+            writer.WriteLine($"\t\tpublic void Configure(EntityTypeBuilder<{entityName}Entity> typeBuilder)");
+            writer.WriteLine("\t\t{");
+            writer.WriteLine("\t\t\ttypeBuilder");
+            writer.WriteLine($"\t\t\t\t.ToTable<{entityName}Entity>(\"{tableName}\", \"ks\");");
+            writer.WriteLine();
+            string keyString = string.Empty;
+            foreach (KamlEntityProperty property in entity.Properties.Where(p => p.IsKey))
+            {
+                if (keyString.Length > 0) 
                 {
-                    File.Delete(sourceFileName);
+                    keyString += ", ";
                 }
+                keyString += "e." + property.Name;
+            }
+            writer.WriteLine($"\t\t\ttypeBuilder.HasKey(e => new {{ {keyString} }})");
+            writer.WriteLine($"\t\t\t\t.HasName(\"{tableName}_PK\");");
+            writer.WriteLine();
 
-                var writer = File.CreateText(sourceFileName);
-                writer.WriteLine("//");
-                writer.WriteLine("// Created by Kraken KAML BO Generator");
-                writer.WriteLine("//");
-                writer.WriteLine();
-                writer.WriteLine("using Koretech.Kraken.Data;");
-                writer.WriteLine("using Microsoft.EntityFrameworkCore;");
-                writer.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
-                writer.WriteLine("using System;");
-                writer.WriteLine();
-                writer.WriteLine("namespace Koretech.Kraken.Data.Configuration");
-                writer.WriteLine("{");
-                writer.WriteLine($"\tpublic class {entityName}EntityTypeConfiguration : IEntityTypeConfiguration<{entityName}Entity>");
-                writer.WriteLine("\t{");
-                writer.WriteLine($"\t\tpublic void Configure(EntityTypeBuilder<{entityName}Entity> typeBuilder)");
-                writer.WriteLine("\t\t{");
-                writer.WriteLine("\t\t\ttypeBuilder");
-                writer.WriteLine($"\t\t\t\t.ToTable<{entityName}Entity>(\"{tableName}\", \"ks\");\r\n");
-                writer.WriteLine($"\t\t\ttypeBuilder.HasKey(e => e.{entityName}Id)");
-                writer.WriteLine($"\t\t\t\t.HasName(\"{tableName}_PK\");");
-                writer.WriteLine();
-
-                // Properties
-                foreach (KamlEntityProperty property in entity.Properties)
+            // Properties
+            foreach (KamlEntityProperty property in entity.Properties)
+            {
+                if (string.Equals(property.DataType, SqlType.Character.TypeName, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    if (string.Equals(property.DataType, SqlType.Character.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        WriteStringColumn(property, writer);
-                    }
-                    else if (string.Equals(property.DataType, SqlType.DateTime.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        WriteDateTimeColumn(property, writer);
-                    }
-                    else if (string.Equals(property.DataType, SqlType.YesNo.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        WriteYesNoColumn(property, writer);
-                    }
-                    else if (string.Equals(property.DataType, SqlType.Integer.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        WriteIntegerColumn(property, writer);
-                    }
-                    else if (string.Equals(property.DataType, SqlType.UniqueIdentifier.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        WriteUuidColumn(property, writer);
-                    }
-                    else if (string.Equals(property.DataType, SqlType.Bytes.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        WriteBytesColumn(property, writer);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{entityName} has property {property.Name} with unknown type {property.DataType}");
-                    }
+                    WriteStringColumn(property, writer);
                 }
-
-                writer.WriteLine("\t\t}");
-                writer.WriteLine("\t}");
-                writer.WriteLine("}");
-
-                writer.Flush();
-                writer.Close();
-                Console.WriteLine($"File {sourceFileName} generated.");
+                else if (string.Equals(property.DataType, SqlType.DateTime.TypeName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteDateTimeColumn(property, writer);
+                }
+                else if (string.Equals(property.DataType, SqlType.YesNo.TypeName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteYesNoColumn(property, writer);
+                }
+                else if (string.Equals(property.DataType, SqlType.Integer.TypeName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteIntegerColumn(property, writer);
+                }
+                else if (string.Equals(property.DataType, SqlType.UniqueIdentifier.TypeName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteUuidColumn(property, writer);
+                }
+                else if (string.Equals(property.DataType, SqlType.Bytes.TypeName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteBytesColumn(property, writer);
+                }
+                else if (string.Equals(property.DataType, SqlType.Byte.TypeName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteByteColumn(property, writer);
+                }
+                else
+                {
+                    Console.WriteLine($"{entityName} has property {property.Name} with unknown type {property.DataType}");
+                }
             }
 
-            private void WriteStringColumn(KamlEntityProperty property, StreamWriter writer)
-            {
-                writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
-                writer.WriteLine($"\t\t\t\t.HasMaxLength({property.Length})");
-                writer.WriteLine("\t\t\t\t.IsUnicode(false)");
-                writer.WriteLine($"\t\t\t\t.HasColumnName({property.Column});");
-                writer.WriteLine();
-            }
+            writer.WriteLine("\t\t}");
+            writer.WriteLine("\t}");
+            writer.WriteLine("}");
 
-            private void WriteDateTimeColumn(KamlEntityProperty property, StreamWriter writer)
-            {
-                writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
-                writer.WriteLine($"\t\t\t\t.HasDefaultValueSql(\"(getdate())\")");
-                writer.WriteLine($"\t\t\t\t.HasColumnType(\"datetime\")");
-                writer.WriteLine($"\t\t\t\t.HasColumnName({property.Column});");
-                writer.WriteLine();
-            }
+            writer.Flush();
+            writer.Close();
+            Console.WriteLine($"File {sourceFileName} generated.");
+        }
 
-            private void WriteIntegerColumn(KamlEntityProperty property, StreamWriter writer)
-            {
-                writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
-                writer.WriteLine($"\t\t\t\t.HasColumnName({property.Column});");
-                writer.WriteLine();
-            }
+        private void WriteStringColumn(KamlEntityProperty property, StreamWriter writer)
+        {
+            writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
+            writer.WriteLine($"\t\t\t\t.HasMaxLength({property.Length})");
+            writer.WriteLine("\t\t\t\t.IsUnicode(false)");
+            writer.WriteLine($"\t\t\t\t.HasColumnName(\"{property.Column}\");");
+            writer.WriteLine();
+        }
 
-            private void WriteUuidColumn(KamlEntityProperty property, StreamWriter writer)
-            {
-                writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
-                writer.WriteLine($"\t\t\t\t.HasColumnType(\"uniqueidentifier\")");
-                writer.WriteLine($"\t\t\t\t.HasColumnName({property.Column});");
-                writer.WriteLine();
-            }
+        private void WriteDateTimeColumn(KamlEntityProperty property, StreamWriter writer)
+        {
+            writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
+            writer.WriteLine($"\t\t\t\t.HasDefaultValueSql(\"(getdate())\")");
+            writer.WriteLine($"\t\t\t\t.HasColumnType(\"datetime\")");
+            writer.WriteLine($"\t\t\t\t.HasColumnName(\"{property.Column}\");");
+            writer.WriteLine();
+        }
 
-            private void WriteBytesColumn(KamlEntityProperty property, StreamWriter writer)
-            {
-                writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
-                writer.WriteLine($"\t\t\t\t.HasColumnType(\"varbinary\")");
-                writer.WriteLine($"\t\t\t\t.HasMaxLength({property.Length})");
-                writer.WriteLine($"\t\t\t\t.HasColumnName({property.Column});");
-                writer.WriteLine();
-            }
+        private void WriteIntegerColumn(KamlEntityProperty property, StreamWriter writer)
+        {
+            writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
+            writer.WriteLine($"\t\t\t\t.HasColumnName(\"{property.Column}\");");
+            writer.WriteLine();
+        }
 
-            private void WriteYesNoColumn(KamlEntityProperty property, StreamWriter writer)
-            {
-                writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
-                writer.WriteLine($"\t\t\t\t.HasMaxLength(1)");
-                writer.WriteLine("\t\t\t\t.IsUnicode(false)");
-                writer.WriteLine($"\t\t\t\t.HasDefaultValueSql(\"('N')\")");
-                writer.WriteLine($"\t\t\t\t.IsFixedLength()");
-                writer.WriteLine($"\t\t\t\t.HasColumnName({property.Column});");
-                writer.WriteLine();
-            }
+        private void WriteUuidColumn(KamlEntityProperty property, StreamWriter writer)
+        {
+            writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
+            writer.WriteLine($"\t\t\t\t.HasColumnType(\"uniqueidentifier\")");
+            writer.WriteLine($"\t\t\t\t.HasColumnName(\"{property.Column}\");");
+            writer.WriteLine();
+        }
+
+        private void WriteBytesColumn(KamlEntityProperty property, StreamWriter writer)
+        {
+            writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
+            writer.WriteLine($"\t\t\t\t.HasColumnType(\"varbinary\")");
+            writer.WriteLine($"\t\t\t\t.HasMaxLength({property.Length})");
+            writer.WriteLine($"\t\t\t\t.HasColumnName(\"{property.Column}\");");
+            writer.WriteLine();
+        }
+
+        private void WriteByteColumn(KamlEntityProperty property, StreamWriter writer)
+        {
+            writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
+            writer.WriteLine($"\t\t\t\t.HasColumnType(\"byte\")");
+            writer.WriteLine($"\t\t\t\t.HasColumnName(\"{property.Column}\");");
+            writer.WriteLine();
+        }
+
+        private void WriteYesNoColumn(KamlEntityProperty property, StreamWriter writer)
+        {
+            writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
+            writer.WriteLine($"\t\t\t\t.HasMaxLength(1)");
+            writer.WriteLine("\t\t\t\t.IsUnicode(false)");
+            writer.WriteLine($"\t\t\t\t.HasDefaultValueSql(\"('N')\")");
+            writer.WriteLine($"\t\t\t\t.IsFixedLength()");
+            writer.WriteLine($"\t\t\t\t.HasColumnName(\"{property.Column}\");");
+            writer.WriteLine();
         }
     }
+}

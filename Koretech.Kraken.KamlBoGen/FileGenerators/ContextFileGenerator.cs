@@ -69,10 +69,10 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             writer.WriteLine("//");
             writer.WriteLine();
             writer.WriteLine("using Koretech.Kraken.Data.Configurations;");
-            writer.WriteLine("using Koretech.Kraken.Data.Entity;");
+            writer.WriteLine("using Koretech.Kraken.Entities.KsUser;");
             writer.WriteLine("using Microsoft.EntityFrameworkCore;");
             writer.WriteLine();
-            writer.WriteLine("namespace Koretech.Kraken.Data.Contexts");
+            writer.WriteLine("namespace Koretech.Kraken.Data");
             writer.WriteLine("{");
             writer.WriteLine($"\tpublic class {domainName}Context : DbContext");
             writer.WriteLine("\t{");

@@ -5,6 +5,7 @@
         #region Static Members
 
         public static readonly SqlType Boolean = new() { TypeName = "boolean", ClrTypeName = "bool" };
+        public static readonly SqlType Byte = new() { TypeName = "byte", ClrTypeName = "byte" };
         public static readonly SqlType Bytes = new() { TypeName = "bytes", ClrTypeName = "byte[]" };
         public static readonly SqlType Character = new() { TypeName = "character", ClrTypeName = "string" };
         public static readonly SqlType Date = new() { TypeName = "date", ClrTypeName = "DateTime" };
@@ -37,6 +38,7 @@
         private static readonly Dictionary<string, SqlType> SqlTypesByName = new()
         {
             { Boolean.TypeName, Boolean },
+            { Byte.TypeName, Byte },
             { Bytes.TypeName, Bytes },
             { Character.TypeName, Character },
             { Date.TypeName, Date },

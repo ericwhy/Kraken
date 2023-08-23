@@ -6,6 +6,7 @@
 
 using Koretech.Kraken.Entities.KsUser;
 using System.Collections;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Koretech.Kraken.BusinessObjects.KsUser
 {
@@ -26,6 +27,8 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		/// <returns>A newly created business object wrapping the provided entity</returns>
 		public static KsUser NewInstance(KsUserEntity entity)
 		{
+			if (entity == null) { return null; }
+
 			KsUser businessObject = new(entity);
 
 			// Recursively create business objects from the entities that have relationships with this one
@@ -90,6 +93,11 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		private KsUser(KsUserEntity entity)
 		{
 			_entity = entity;
+		}
+
+		public KsUser() 
+		{
+			_entity = new();
 		}
 
 		internal KsUserEntity Entity

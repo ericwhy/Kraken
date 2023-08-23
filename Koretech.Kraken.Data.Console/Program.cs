@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using Koretech.Kraken.Data.Contexts;
+﻿using Koretech.Kraken.Contexts;
 using Microsoft.EntityFrameworkCore;
-using Koretech.Kraken.Data.Entity;
 
 namespace Koretech.Kraken
 {
@@ -15,15 +12,18 @@ namespace Koretech.Kraken
                 .Options;
 
             var context = new KsUserContext(contextOptions);
-            var user = (from u in context.Users
+            var users = (from u in context.Users
                         join s in context.KsUserEntityScope("keithl@koretech.com", "Koretech.KommerceServer.BusinessObjects.KSUser.KsUser", "Retrieve", null)
                           on u.KsUserId equals s.KsUserId
-                        select u)
-                        .FirstOrDefault(); //context.Users.Where(x=>x.DisplayName.EndsWith("Yarbrough")).FirstOrDefault();
-            user.FailedLoginDt = DateTime.Now;
+                        select u);
+                        //.FirstOrDefault(); //context.Users.Where(x=>x.DisplayName.EndsWith("Yarbrough")).FirstOrDefault();
+//            user.FailedLoginDt = DateTime.Now;
             context.SaveChanges();
 
-            Console.WriteLine($"Hello {user?.DisplayName} at {user?.EmailAddress}");
+            foreach (var user in users)
+            {
+                Console.WriteLine($"Hello {user?.DisplayName} at {user?.EmailAddress}");
+            }
         }
     }
 }

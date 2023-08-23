@@ -35,7 +35,7 @@
         <BoundProperty Name="IntegratedAuth" Label="Integrated Auth" Type="yesno" Length="1" IsRequired="true" Column="integrated_auth" />
         <BoundProperty Name="AuthPrompt" Label="Auth Prompt" Type="yesno" Length="1" IsRequired="true" Column="auth_prompt" />
         <BoundProperty Name="PwresetFlg" Label="Pwreset" Type="yesno" Length="1" IsRequired="true" Column="pwreset_flg" />
-        <BoundProperty Name="FailedLoginCnt" Label="Failed Login Cnt" Type="integer" DefaultValue="0" Length="3" Column="failed_login_cnt" />
+        <BoundProperty Name="FailedLoginCnt" Label="Failed Login Cnt" Type="byte" DefaultValue="0" Length="3" Column="failed_login_cnt" />
         <BoundProperty Name="FailedLoginDt" Label="Failed Login Date" Type="datetime" Length="23" Column="failed_login_dt" />
       </Properties>
     </BusinessObject>

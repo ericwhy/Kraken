@@ -54,7 +54,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             string domainName = DomainRoot.Name;
             string entityFullPath = Path.Combine(outputRootDirectory.FullName, entitiesPath);
             string domainFullPath = Path.Combine(entityFullPath, domainName);
-            string sourceFileName = Path.Combine(domainFullPath, $"{entityName}.cs");
+            string sourceFileName = Path.Combine(domainFullPath, $"{entityName}Entity.cs");
             {
                 File.Delete(sourceFileName);
             }
@@ -62,7 +62,9 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             writer.WriteLine("//");
             writer.WriteLine("// Created by Kraken KAML BO Generator");
             writer.WriteLine("//");
-            writer.WriteLine("namespace Koretech.Kraken.Data");
+            writer.WriteLine("// DO NOT MODIFY");
+            writer.WriteLine("//");
+            writer.WriteLine($"namespace Koretech.Kraken.Entities.{domainName}");
             writer.WriteLine("{");
             writer.WriteLine($"\tpublic class {entityName}Entity");
             writer.WriteLine("\t{");
@@ -81,7 +83,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 }
                 else if (string.Equals(property.DataType, SqlType.YesNo.TypeName, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    WriteStringProperty(property, writer);
+                    WriteYesNoProperty(property, writer);
                 }
                 else if (string.Equals(property.DataType, SqlType.Integer.TypeName, StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -95,27 +97,35 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 {
                     WriteBytesProperty(property, writer);
                 }
+                else if (string.Equals(property.DataType, SqlType.Byte.TypeName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    WriteByteProperty(property, writer);
+                }
                 else
                 {
                     Console.WriteLine($"{entityName} has property {property.Name} with unknown type {property.DataType}");
                 }
+                writer.WriteLine();
             }
 
-            // relations
+            // Relations
             foreach (var rel in entity.Relations)
             {
-                // Not supporting inter-domain relationships at this time
-                if (string.IsNullOrEmpty(rel.TargetDomain))
+                if (rel.IsToMany || rel.IsToOwnerMany)
                 {
-                    if (rel.IsToMany)
-                    {
-                        WriteToManyRelationProperty(rel, writer);
-                    }
-                    else
-                    {
-                        WriteToOneRelationProperty(rel, writer);
-                    }
+                    WriteToManyRelationProperty(rel, writer);
                 }
+                else
+                {
+                    WriteToOneRelationProperty(rel, writer);
+                }
+
+                // Not supporting inter-domain relationships at this time
+                if (!string.IsNullOrEmpty(rel.TargetDomain))
+                {
+                    writer.WriteLine("\t\t// This is an inter-domain relationship. Not fully implemented yet.");
+                }
+                writer.WriteLine();
             }
 
             writer.WriteLine("\t}");
@@ -177,19 +187,37 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             writer.WriteLine();
         }
 
+        private void WriteByteProperty(KamlEntityProperty property, StreamWriter writer)
+        {
+            string nullableChar = property.IsRequired ? string.Empty : "?";
+            writer.Write($"\t\tpublic byte{nullableChar} {property.Name}");
+            writer.Write(" {get; set;}");
+            writer.WriteLine();
+        }
+
+        private void WriteYesNoProperty(KamlEntityProperty property, StreamWriter writer)
+        {
+            string nullableChar = property.IsRequired ? string.Empty : "?";
+            writer.Write($"\t\tpublic char{nullableChar} {property.Name}");
+            writer.Write(" {get; set;}");
+            writer.WriteLine();
+        }
+
         private void WriteToManyRelationProperty(KamlEntityRelation relation, StreamWriter writer)
         {
             string targetEntityType = $"{relation.TargetEntity}Entity";
+            string relationType = (relation.IsToOwnerOne || relation.IsToOwnerMany) ? "owner" : "child";
             writer.Write($"\t\tpublic IList<{targetEntityType}> {relation.Name} {{get; set;}}");
-            writer.Write($" = new List<{targetEntityType}>();  // Navigation property to child {targetEntityType}");
+            writer.Write($" = new List<{targetEntityType}>();  // Navigation property to {relationType} {targetEntityType}");
             writer.WriteLine();
         }
 
         private void WriteToOneRelationProperty(KamlEntityRelation relation, StreamWriter writer)
         {
             string targetEntityType = $"{relation.TargetEntity}Entity";
+            string relationType = (relation.IsToOwnerOne || relation.IsToOwnerMany) ? "owner" : "child";
             writer.Write($"\t\tpublic {targetEntityType} {relation.Name} {{get; set;}}");
-            writer.Write($" = new();  // Navigation property to parent {targetEntityType}");
+            writer.Write($"  // Navigation property to {relationType} {targetEntityType}");  //TODO: How to initialize?  Can't use new() due to recursion.
             writer.WriteLine();
         }
     }

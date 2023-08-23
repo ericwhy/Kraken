@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Consol
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.KamlBoGen", "Koretech.Kraken.KamlBoGen\Koretech.Kraken.KamlBoGen.csproj", "{D838CFF5-5B2B-4C28-B672-45252779BD2F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Test", "Koretech.Kraken.Data.Test\Koretech.Kraken.Data.Test.csproj", "{004280AE-9892-4501-A451-9793D0F39BCD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Test.Console", "Koretech.Kraken.Data.Test.Console\Koretech.Kraken.Data.Test.Console.csproj", "{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{D838CFF5-5B2B-4C28-B672-45252779BD2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D838CFF5-5B2B-4C28-B672-45252779BD2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D838CFF5-5B2B-4C28-B672-45252779BD2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{004280AE-9892-4501-A451-9793D0F39BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{004280AE-9892-4501-A451-9793D0F39BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{004280AE-9892-4501-A451-9793D0F39BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{004280AE-9892-4501-A451-9793D0F39BCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,9 +2,9 @@
 using Koretech.Kraken.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Koretech.Kraken.Data.Contexts
+namespace Koretech.Kraken.Contexts
 {
-    public class KsUserContext: DbContext
+    public class KsUserContext : DbContext
     {
         public KsUserContext() { }
         public KsUserContext(DbContextOptions<KsUserContext> options) : base(options) { }

@@ -10,10 +10,10 @@ using System.Collections;
 namespace Koretech.Kraken.BusinessObjects.KsUser
 {
 	/// <summary>
-	/// This business object class wraps the domain entity KsUserLoginFailureEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsUserTokenEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public class KsUserLoginFailure
+	public class KsUserToken
 	{
 		#region Static Methods
 
@@ -24,15 +24,16 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		/// </summary>
 		/// <param name="entity">The entity to create a business object from</param>
 		/// <returns>A newly created business object wrapping the provided entity</returns>
-		public static KsUserLoginFailure NewInstance(KsUserLoginFailureEntity entity)
+		public static KsUserToken NewInstance(KsUserTokenEntity entity)
 		{
-			KsUserLoginFailure businessObject = new(entity);
+			if (entity == null) return null;
+			
+			KsUserToken businessObject = new(entity);
 
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			IList<KsUser> newKsUser = Koretech.Kraken.BusinessObjects.KsUser.KsUser.NewInstance(entity.User);
-			businessObject.User.AddRange(newKsUser);
+			businessObject.KsUser = KsUser.NewInstance(entity.KsUser);
 
 			return businessObject;
 		}
@@ -44,20 +45,19 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		/// </summary>
 		/// <param name="entities">The entities to create business objects from</param>
 		/// <returns>A newly created business object(s) wrapping the provided entities</returns>
-		public static IList<KsUserLoginFailure> NewInstance(IList<KsUserLoginFailureEntity> entities)
+		public static IList<KsUserToken> NewInstance(IList<KsUserTokenEntity> entities)
 		{
-			List<KsUserLoginFailure> businessObjects = new();
+			List<KsUserToken> businessObjects = new();
 
-			foreach (KsUserLoginFailureEntity entity in entities)
+			foreach (KsUserTokenEntity entity in entities)
 			{
-				KsUserLoginFailure newBusinessObject = new(entity);
+				KsUserToken newBusinessObject = new(entity);
 				businessObjects.Add(newBusinessObject);
 
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				IList<KsUser> newKsUser = Koretech.Kraken.BusinessObjects.KsUser.KsUser.NewInstance(entity.User);
-				newBusinessObject.User.AddRange(newKsUser);
+				newBusinessObject.KsUser = KsUser.NewInstance(entity.KsUser);
 			}
 
 			return businessObjects;
@@ -65,23 +65,41 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 
 		#endregion Static Methods
 
-		private KsUserLoginFailureEntity _entity;
+		private KsUserTokenEntity _entity;
 
 		/// <summary>
 		/// Constructor.  Private to force use of the static factory method NewInstance().
 		/// </summary>
 		/// <param name="entity">An entity that provides data for the business object</param>
-		private KsUserLoginFailure(KsUserLoginFailureEntity entity)
+		private KsUserToken(KsUserTokenEntity entity)
 		{
 			_entity = entity;
 		}
 
-		internal KsUserLoginFailureEntity Entity
+		internal KsUserTokenEntity Entity
 		{
 			get => _entity;
 		}
 
 		#region Entity Properties
+
+		public int TokenNo
+		{
+			get => _entity.TokenNo;
+			set => _entity.TokenNo = value;
+		}
+
+		public Guid Selector
+		{
+			get => _entity.Selector;
+			set => _entity.Selector = value;
+		}
+
+		public byte[] ValidatorHash
+		{
+			get => _entity.ValidatorHash;
+			set => _entity.ValidatorHash = value;
+		}
 
 		public string KsUserId
 		{
@@ -89,17 +107,17 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 			set => _entity.KsUserId = value;
 		}
 
-		public DateTime FailDt
+		public DateTime ExpirationDt
 		{
-			get => _entity.FailDt;
-			set => _entity.FailDt = value;
+			get => _entity.ExpirationDt;
+			set => _entity.ExpirationDt = value;
 		}
 
 		#endregion Entity Properties
 
 		#region Relationships
 
-		public List<KsUser> User = new();
+		public KsUser KsUser;
 
 		#endregion Relationships
 
