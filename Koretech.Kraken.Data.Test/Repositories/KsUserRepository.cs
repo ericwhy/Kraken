@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Koretech.Kraken.Repositories
 {
-    public sealed class KsUserRepository : Repository<KsUserEntity>
+    public class KsUserRepository : Repository<KsUserEntity>
     {
         public KsUserRepository(KsUserContext dbContext) : base(dbContext) { }
 

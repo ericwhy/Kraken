@@ -1,19 +1,24 @@
-//
-// Created by Kraken KAML BO Generator
-//
-// DO NOT MODIFY
-//
+/********************************************************/
+/*                                                      */
+/* Created by Kraken KAML BO Generator                  */
+/*                                                      */
+/* DO NOT MODIFY                                        */
+/*                                                      */
+/* Extensions or overrides should be placed in a        */
+/* subclass or partial class, whichever is appropriate. */
+/*                                                      */
+/********************************************************/
 
-using Koretech.Kraken.Entities.KsUser;
+using Koretech.Infrastructure.Services.KsUser.Entities;
 using System.Collections;
 
-namespace Koretech.Kraken.BusinessObjects.KsUser
+namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 {
 	/// <summary>
-	/// This business object class wraps the domain entity KsUserLoginFailureEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsUserRoleEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public class KsUserLoginFailure
+	public partial class KsUserRole : KsUserRoleBase
 	{
 		#region Static Methods
 
@@ -24,15 +29,17 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		/// </summary>
 		/// <param name="entity">The entity to create a business object from</param>
 		/// <returns>A newly created business object wrapping the provided entity</returns>
-		public static KsUserLoginFailure NewInstance(KsUserLoginFailureEntity entity)
+		public static KsUserRole NewInstance(KsUserRoleEntity entity)
 		{
-			KsUserLoginFailure businessObject = new(entity);
+			KsUserRole businessObject = new(entity);
 
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			IList<KsUser> newKsUser = Koretech.Kraken.BusinessObjects.KsUser.KsUser.NewInstance(entity.User);
+			IList<KsUser> newKsUser = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser.NewInstance(entity.User);
 			businessObject.User.AddRange(newKsUser);
+
+			businessObject.Role = KsRoleUser.NewInstance(entity.Role);
 
 			return businessObject;
 		}
@@ -44,64 +51,27 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		/// </summary>
 		/// <param name="entities">The entities to create business objects from</param>
 		/// <returns>A newly created business object(s) wrapping the provided entities</returns>
-		public static IList<KsUserLoginFailure> NewInstance(IList<KsUserLoginFailureEntity> entities)
+		public static IList<KsUserRole> NewInstance(IList<KsUserRoleEntity> entities)
 		{
-			List<KsUserLoginFailure> businessObjects = new();
+			List<KsUserRole> businessObjects = new();
 
-			foreach (KsUserLoginFailureEntity entity in entities)
+			foreach (KsUserRoleEntity entity in entities)
 			{
-				KsUserLoginFailure newBusinessObject = new(entity);
+				KsUserRole newBusinessObject = new(entity);
 				businessObjects.Add(newBusinessObject);
 
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				IList<KsUser> newKsUser = Koretech.Kraken.BusinessObjects.KsUser.KsUser.NewInstance(entity.User);
+				IList<KsUser> newKsUser = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser.NewInstance(entity.User);
 				newBusinessObject.User.AddRange(newKsUser);
+
+				newBusinessObject.Role = KsRoleUser.NewInstance(entity.Role);
 			}
 
 			return businessObjects;
 		}
 
 		#endregion Static Methods
-
-		private KsUserLoginFailureEntity _entity;
-
-		/// <summary>
-		/// Constructor.  Private to force use of the static factory method NewInstance().
-		/// </summary>
-		/// <param name="entity">An entity that provides data for the business object</param>
-		private KsUserLoginFailure(KsUserLoginFailureEntity entity)
-		{
-			_entity = entity;
-		}
-
-		internal KsUserLoginFailureEntity Entity
-		{
-			get => _entity;
-		}
-
-		#region Entity Properties
-
-		public string KsUserId
-		{
-			get => _entity.KsUserId;
-			set => _entity.KsUserId = value;
-		}
-
-		public DateTime FailDt
-		{
-			get => _entity.FailDt;
-			set => _entity.FailDt = value;
-		}
-
-		#endregion Entity Properties
-
-		#region Relationships
-
-		public List<KsUser> User = new();
-
-		#endregion Relationships
-
 	}
 }

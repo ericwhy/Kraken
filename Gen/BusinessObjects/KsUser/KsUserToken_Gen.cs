@@ -1,19 +1,24 @@
-//
-// Created by Kraken KAML BO Generator
-//
-// DO NOT MODIFY
-//
+/********************************************************/
+/*                                                      */
+/* Created by Kraken KAML BO Generator                  */
+/*                                                      */
+/* DO NOT MODIFY                                        */
+/*                                                      */
+/* Extensions or overrides should be placed in a        */
+/* subclass or partial class, whichever is appropriate. */
+/*                                                      */
+/********************************************************/
 
-using Koretech.Kraken.Entities.KsUser;
+using Koretech.Infrastructure.Services.KsUser.Entities;
 using System.Collections;
 
-namespace Koretech.Kraken.BusinessObjects.KsUser
+namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 {
 	/// <summary>
 	/// This business object class wraps the domain entity KsUserTokenEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public class KsUserToken
+	public partial class KsUserToken : KsUserTokenBase
 	{
 		#region Static Methods
 
@@ -62,62 +67,5 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		}
 
 		#endregion Static Methods
-
-		private KsUserTokenEntity _entity;
-
-		/// <summary>
-		/// Constructor.  Private to force use of the static factory method NewInstance().
-		/// </summary>
-		/// <param name="entity">An entity that provides data for the business object</param>
-		private KsUserToken(KsUserTokenEntity entity)
-		{
-			_entity = entity;
-		}
-
-		internal KsUserTokenEntity Entity
-		{
-			get => _entity;
-		}
-
-		#region Entity Properties
-
-		public int TokenNo
-		{
-			get => _entity.TokenNo;
-			set => _entity.TokenNo = value;
-		}
-
-		public Guid Selector
-		{
-			get => _entity.Selector;
-			set => _entity.Selector = value;
-		}
-
-		public byte[] ValidatorHash
-		{
-			get => _entity.ValidatorHash;
-			set => _entity.ValidatorHash = value;
-		}
-
-		public string KsUserId
-		{
-			get => _entity.KsUserId;
-			set => _entity.KsUserId = value;
-		}
-
-		public DateTime ExpirationDt
-		{
-			get => _entity.ExpirationDt;
-			set => _entity.ExpirationDt = value;
-		}
-
-		#endregion Entity Properties
-
-		#region Relationships
-
-		public KsUser KsUser;
-
-		#endregion Relationships
-
 	}
 }

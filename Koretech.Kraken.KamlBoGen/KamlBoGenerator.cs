@@ -37,6 +37,8 @@ namespace Koretech.Kraken.Kaml
             BusinessObjectFileGenerator boFileGenerator = new(OutputRoot);
             ContextFileGenerator contextFileGenerator = new(OutputRoot);
             ConfigurationFileGenerator configurationFileGenerator = new(OutputRoot);
+            RepositoryFileGenerator repositoryFileGenerator = new(OutputRoot);
+            ServiceFileGenerator serviceFileGenerator = new(OutputRoot);
 
             // Create the output directories if they don't exist
             OutputRoot.Create();
@@ -44,6 +46,8 @@ namespace Koretech.Kraken.Kaml
             configurationFileGenerator.CreateOutputDirectory();            
             contextFileGenerator.CreateOutputDirectory();
             boFileGenerator.CreateOutputDirectory();
+            repositoryFileGenerator.CreateOutputDirectory();
+            serviceFileGenerator.CreateOutputDirectory();
 
             // Read the .kamlbo document
             XElement kamlRoot = XElement.Load(SourceKamlBo.FullName);
@@ -59,7 +63,7 @@ namespace Koretech.Kraken.Kaml
             }
             Console.WriteLine();
 
-            // Read the scope function
+            // Read the scope function for the context generator
             XElement scopeElement = (from e in kamlRoot.Descendants("Scopes") select e).First();
             if (scopeElement != null )
             {
@@ -75,12 +79,23 @@ namespace Koretech.Kraken.Kaml
             entityFileGenerator.DomainRoot = domainRoot;
             boFileGenerator.DomainRoot = domainRoot;
             configurationFileGenerator.DomainRoot = domainRoot;
+            repositoryFileGenerator.DomainRoot = domainRoot;
+            serviceFileGenerator.DomainRoot = domainRoot;
 
             // Create the context file
             contextFileGenerator.CreateContextFile(entities);
             Console.WriteLine();
 
-            // Create the entity source files, business object POCOs and entity configurations
+            // Create the repository file
+            repositoryFileGenerator.CreateRepositoryFile(domainRoot);
+            Console.WriteLine();
+
+            // Create the service files
+            serviceFileGenerator.CreateServiceFile(domainRoot);
+// TODO:            serviceFileGenerator.CreateServiceInterfaceFile(domainRoot);
+            Console.WriteLine();
+
+            // Create source files for the entities, business object POCOs and entity configurations
             entityFileGenerator.CreateDomainSubdirectory();
             boFileGenerator.CreateDomainSubdirectory();
             foreach (KamlBoEntity entity in entities)

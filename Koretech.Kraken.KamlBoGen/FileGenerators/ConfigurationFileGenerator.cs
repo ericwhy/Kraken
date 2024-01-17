@@ -1,44 +1,15 @@
 ﻿using Koretech.Kraken.Kaml;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
-    internal class ConfigurationFileGenerator
+    internal class ConfigurationFileGenerator : FileGenerator
     {
         private const string configurationsPath = "Configurations";
 
-        private readonly DirectoryInfo outputRootDirectory;
-
-        /// <summary>
-        /// The entity that is at the root of the DDD domain.
-        /// </summary>
-        public KamlBoEntity DomainRoot { get; set; } = null!;
-
-        public ConfigurationFileGenerator(DirectoryInfo outputRootDirectory)
-        {
-            this.outputRootDirectory = outputRootDirectory ?? throw new ArgumentNullException(nameof(outputRootDirectory));
+        public ConfigurationFileGenerator(DirectoryInfo outputDirectory) : base(outputDirectory) 
+        { 
+            generatePath = configurationsPath;
         }
-
-        /// <summary>
-        /// Creates the subdirectory for storing configuration files if it doesn't already exist.
-        /// </summary>
-        public void CreateOutputDirectory()
-        {
-            outputRootDirectory.CreateSubdirectory(configurationsPath);
-        }
-
-        /// <summary>
-        /// Creates the subdirectory for storing configuration files in a specific domain if it doesn't already exist.
-        /// </summary>
-        //public void CreateDomainSubdirectory() {
-        //    outputRootDirectory.GetDirectories(configurationsPath).Single().CreateSubdirectory(DomainRoot.Name);
-        //}
 
         /// <summary>
         /// Generates an EF entity type configuration class from a KAML BO specification.

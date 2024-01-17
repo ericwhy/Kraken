@@ -1,4 +1,6 @@
-﻿namespace Koretech.Kraken.KamlBoGen
+﻿using System.ComponentModel;
+
+namespace Koretech.Kraken.KamlBoGen
 {
     internal class SqlType
     {
@@ -22,6 +24,8 @@
         /// <returns>The SqlType instance with the given name</returns>
         public static SqlType GetSqlType(string sqlTypeName)
         {
+            _ = sqlTypeName ?? throw new ArgumentNullException(nameof(sqlTypeName));
+            if (!SqlTypesByName.ContainsKey(sqlTypeName)) throw new ArgumentException($"{sqlTypeName} is not a valid argument value", nameof(sqlTypeName));
             return SqlTypesByName[sqlTypeName];
         }
 
@@ -29,7 +33,7 @@
         /// <returns>The name of the CLR data type corresponding to the given SQL type</returns>
         public static string GetClrTypeName(string sqlTypeName)
         {
-            return SqlTypesByName[sqlTypeName].ClrTypeName;
+            return GetSqlType(sqlTypeName).ClrTypeName;
         }
 
         /// <summary>

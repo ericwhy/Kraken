@@ -1,9 +1,15 @@
-//
-// Created by Kraken KAML BO Generator
-//
-// DO NOT MODIFY
-//
-namespace Koretech.Kraken.Entities.KsUser
+/********************************************************/
+/*                                                      */
+/* Created by Kraken KAML BO Generator                  */
+/*                                                      */
+/* DO NOT MODIFY                                        */
+/*                                                      */
+/* Extensions or overrides should be placed in a        */
+/* subclass or partial class, whichever is appropriate. */
+/*                                                      */
+/********************************************************/
+
+namespace Koretech.Infrastructure.Services.KsUser.Entities
 {
 	public class KsUserTokenEntity
 	{

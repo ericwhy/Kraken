@@ -1,37 +1,14 @@
 ﻿using Koretech.Kraken.Kaml;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
-    internal class EntityFileGenerator
+    internal class EntityFileGenerator : FileGenerator
     {
-
         private const string entitiesPath = "Entities";
 
-        private readonly DirectoryInfo outputRootDirectory;
-
-        /// <summary>
-        /// The entity that is at the root of the DDD domain.
-        /// </summary>
-        public KamlBoEntity DomainRoot { get; set; } = null!;
-
-        public EntityFileGenerator(DirectoryInfo outputRootDirectory)
+        public EntityFileGenerator(DirectoryInfo outputRootDirectory) : base(outputRootDirectory)
         {
-            this.outputRootDirectory = outputRootDirectory ?? throw new ArgumentNullException(nameof(outputRootDirectory));
-        }
-
-        /// <summary>
-        /// Creates the subdirectory for storing entity files if it doesn't already exist.
-        /// </summary>
-        public void CreateOutputDirectory()
-        {
-            outputRootDirectory.CreateSubdirectory(entitiesPath);
+            generatePath = entitiesPath;            
         }
 
         /// <summary>
@@ -59,12 +36,9 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 File.Delete(sourceFileName);
             }
             var writer = File.CreateText(sourceFileName);
-            writer.WriteLine("//");
-            writer.WriteLine("// Created by Kraken KAML BO Generator");
-            writer.WriteLine("//");
-            writer.WriteLine("// DO NOT MODIFY");
-            writer.WriteLine("//");
-            writer.WriteLine($"namespace Koretech.Kraken.Entities.{domainName}");
+            writer.Write(GetFileHeader());
+            writer.WriteLine();
+            writer.WriteLine($"namespace Koretech.Infrastructure.Services.{domainName}.Entities");
             writer.WriteLine("{");
             writer.WriteLine($"\tpublic class {entityName}Entity");
             writer.WriteLine("\t{");

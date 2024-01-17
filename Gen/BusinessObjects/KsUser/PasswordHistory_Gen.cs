@@ -1,19 +1,24 @@
-//
-// Created by Kraken KAML BO Generator
-//
-// DO NOT MODIFY
-//
+/********************************************************/
+/*                                                      */
+/* Created by Kraken KAML BO Generator                  */
+/*                                                      */
+/* DO NOT MODIFY                                        */
+/*                                                      */
+/* Extensions or overrides should be placed in a        */
+/* subclass or partial class, whichever is appropriate. */
+/*                                                      */
+/********************************************************/
 
-using Koretech.Kraken.Entities.KsUser;
+using Koretech.Infrastructure.Services.KsUser.Entities;
 using System.Collections;
 
-namespace Koretech.Kraken.BusinessObjects.KsUser
+namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 {
 	/// <summary>
 	/// This business object class wraps the domain entity PasswordHistoryEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public class PasswordHistory
+	public partial class PasswordHistory : PasswordHistoryBase
 	{
 		#region Static Methods
 
@@ -31,7 +36,7 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			IList<KsUser> newKsUser = Koretech.Kraken.BusinessObjects.KsUser.KsUser.NewInstance(entity.KsUser);
+			IList<KsUser> newKsUser = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser.NewInstance(entity.KsUser);
 			businessObject.KsUser.AddRange(newKsUser);
 
 			return businessObject;
@@ -56,7 +61,7 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				IList<KsUser> newKsUser = Koretech.Kraken.BusinessObjects.KsUser.KsUser.NewInstance(entity.KsUser);
+				IList<KsUser> newKsUser = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser.NewInstance(entity.KsUser);
 				newBusinessObject.KsUser.AddRange(newKsUser);
 			}
 
@@ -64,56 +69,5 @@ namespace Koretech.Kraken.BusinessObjects.KsUser
 		}
 
 		#endregion Static Methods
-
-		private PasswordHistoryEntity _entity;
-
-		/// <summary>
-		/// Constructor.  Private to force use of the static factory method NewInstance().
-		/// </summary>
-		/// <param name="entity">An entity that provides data for the business object</param>
-		private PasswordHistory(PasswordHistoryEntity entity)
-		{
-			_entity = entity;
-		}
-
-		internal PasswordHistoryEntity Entity
-		{
-			get => _entity;
-		}
-
-		#region Entity Properties
-
-		public string KsUserId
-		{
-			get => _entity.KsUserId;
-			set => _entity.KsUserId = value;
-		}
-
-		public string? Password
-		{
-			get => _entity.Password;
-			set => _entity.Password = value;
-		}
-
-		public string? PasswordSalt
-		{
-			get => _entity.PasswordSalt;
-			set => _entity.PasswordSalt = value;
-		}
-
-		public DateTime CreateDt
-		{
-			get => _entity.CreateDt;
-			set => _entity.CreateDt = value;
-		}
-
-		#endregion Entity Properties
-
-		#region Relationships
-
-		public List<KsUser> KsUser = new();
-
-		#endregion Relationships
-
 	}
 }

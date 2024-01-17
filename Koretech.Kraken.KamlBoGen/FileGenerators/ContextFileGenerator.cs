@@ -1,47 +1,17 @@
 ﻿using Koretech.Kraken.Kaml;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
-    internal class ContextFileGenerator
+    internal class ContextFileGenerator : FileGenerator
     {
-
         private const string contextsPath = "Contexts";
-
-        private readonly DirectoryInfo outputRootDirectory;
-
-        /// <summary>
-        /// The entity that is at the root of the DDD domain.
-        /// </summary>
-        public KamlBoEntity DomainRoot { get; set; } = null!;
 
         public string? ScopeFunction { get; set; }
 
-        public ContextFileGenerator(DirectoryInfo outputRootDirectory)
+        public ContextFileGenerator(DirectoryInfo outputRootDirectory) : base(outputRootDirectory)
         {
-            this.outputRootDirectory = outputRootDirectory ?? throw new ArgumentNullException(nameof(outputRootDirectory));
+            generatePath = contextsPath;
         }
-
-        /// <summary>
-        /// Creates the subdirectory for storing context files if it doesn't already exist.
-        /// </summary>
-        public void CreateOutputDirectory()
-        {
-            outputRootDirectory.CreateSubdirectory(contextsPath);
-        }
-
-        /// <summary>
-        /// Creates the subdirectory for storing context files in a specific domain if it doesn't already exist.
-        /// </summary>
-        //public void CreateDomainSubdirectory() {
-        //    outputRootDirectory.GetDirectories(contextsPath).Single().CreateSubdirectory(DomainRoot.Name);
-        //}
 
         /// <summary>
         /// Generates an EF context class from a KAML BO specification.

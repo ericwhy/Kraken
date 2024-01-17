@@ -9,23 +9,23 @@
 /*                                                      */
 /********************************************************/
 
-namespace Koretech.Infrastructure.Services.KsUser.Entities
+
+using Koretech.Infrastructure.Services.KsUser.Entities;
+using Koretech.Infrastructure.Services.KsUser.Repositories;
+using KsUserBO = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser;
+
+namespace Koretech.Infrastructure.Services.KsUser
 {
-	public class KsUserRoleEntity
+	internal interface IKsUserService
 	{
-	
-		public string KsUserId {get; set;} = string.Empty;
+		public Task<IEnumerable<KsUserBO>> GetAllAsync();
 
-		public string ResourceType {get; set;} = string.Empty;
+		public Task<KsUserBO?> GetByPrimaryKeyAsync(string KsUserId);
 
-		public string ResourceName {get; set;} = string.Empty;
+		public void Insert(KsUserBO businessObject);
 
-		public int RoleNo {get; set;}
+		public void Update(KsUserBO businessObject);
 
-		public IList<KsUserEntity> User {get; set;} = new List<KsUserEntity>();  // Navigation property to owner KsUserEntity
-
-		public KsRoleUserEntity Role {get; set;}  // Navigation property to child KsRoleUserEntity
-		// This is an inter-domain relationship. Not fully implemented yet.
-
+		public void Delete(KsUserBO businessObject);
 	}
 }

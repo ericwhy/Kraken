@@ -5,16 +5,14 @@
 //
 
 using Koretech.Kraken.Entities.KsUser;
-using System.Collections;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Koretech.Kraken.BusinessObjects.KsUser
 {
-	/// <summary>
-	/// This business object class wraps the domain entity KsUserEntity and provides access to the entity's data
-	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
-	/// </summary>
-	public class KsUser
+    /// <summary>
+    /// This business object class wraps the domain entity KsUserEntity and provides access to the entity's data
+    /// through accessor properties.  It also provides a place for business logic related to the domain entity.
+    /// </summary>
+    public partial class KsUser
 	{
 		#region Static Methods
 
