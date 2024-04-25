@@ -62,13 +62,14 @@ namespace Koretech.Kraken.KamlBoGen.KamlBoModel
 
         static public KamlBoEntity ParseFromXElement(XElement boEl, KamlBoDomain domain)
         {
-            string name = boEl.Attribute("Name")?.Value ?? "?_?";
-            string tableName = boEl.Element("Data")?.Attribute("Table")?.Value ?? "?_?";
+            string name = boEl.Attribute("Name")?.Value ?? throw new Exception("Unable to get the value of attribute 'Name' from BusinessObject element");
+            XElement? dataEl = boEl.Elements().FirstOrDefault(e => e.Name.LocalName.Equals("Data"));
+            string tableName = dataEl?.Attribute("Table")?.Value ?? throw new Exception($"Unable to get the value of attribute 'Table' from Data element in BO '{name}'"); ;
             var entity = new KamlBoEntity(name, tableName, domain);
             domain.AddBoEntity(entity); // Link the entity to its domain.
 
             // Get all the properties
-            var propertiesEl = boEl.Element("Properties");
+            var propertiesEl = boEl.Elements().Where(e => e.Name.LocalName.Equals("Properties"));
             if (propertiesEl != null)
             {
                 foreach (var propertyEl in propertiesEl.Elements())

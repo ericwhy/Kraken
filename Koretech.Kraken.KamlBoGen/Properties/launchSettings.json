@@ -2,7 +2,7 @@
   "profiles": {
     "Koretech.Kraken.KamlBoGen": {
       "commandName": "Project",
-      "commandLineArgs": "--source-file ../../../../Koretech.Kraken.Data/KsRole.kamlbo --output-directory ../../../../Gen"
+      "commandLineArgs": "--source-file ../../../../Koretech.Kraken.Data/KsMenu.kamlbo --output-directory ../../../../Gen"
     }
   }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DomainObject Name="KsRole" PrimaryObject="KsRoleUser">
+<Domain Name="KsRole" PrimaryObject="KsRoleUser">
   <BusinessObjects>
     <BusinessObject Name="KsRoleUser" DisplayTextFormat="{RoleDesc}">
       <Data Table="ks_role_user" />

@@ -4,7 +4,12 @@ using System.Xml.Linq;
 
 namespace Koretech.Kraken.KamlBoGen
 {
-    public class KamlBoGen {
+    public class KamlBoGen 
+    {
+        private const string DomainTag = "Domain";
+        private const string BusinessObjectTag = "BusinessObject";
+        private const string ScopeTag = "Scopes";
+
         public KamlBoGen(FileInfo source, DirectoryInfo outPath) {
             SourceKamlBo = source;
             OutputRoot = outPath;
@@ -45,11 +50,11 @@ namespace Koretech.Kraken.KamlBoGen
             XElement kamlRoot = XElement.Load(SourceKamlBo.FullName);
 
             // Load the domain information
-            var domainElement = (from e in kamlRoot.DescendantsAndSelf("DomainObject") select e).First();
+            var domainElement = kamlRoot;
             KamlBoDomain domain = KamlBoDomain.ParseFromXElement(domainElement);
 
             // Load the business object definitions
-            var boElements = from e in kamlRoot.Descendants("BusinessObject") select e;
+            var boElements = kamlRoot.Descendants().Where(e => e.Name.LocalName.Equals(BusinessObjectTag));
             List<KamlBoEntity> entities = new();
             foreach (var boElement in boElements)
             {
@@ -60,7 +65,7 @@ namespace Koretech.Kraken.KamlBoGen
             Console.WriteLine();
 
             // Read the scope function for the context generator
-            XElement scopeElement = (from e in kamlRoot.Descendants("Scopes") select e).First();
+            XElement scopeElement = kamlRoot.Descendants().Where(e => e.Name.LocalName.Equals(ScopeTag)).First();
             if (scopeElement != null )
             {
                 contextFileGenerator.ScopeFunction = scopeElement.Attribute("Function")?.Value;

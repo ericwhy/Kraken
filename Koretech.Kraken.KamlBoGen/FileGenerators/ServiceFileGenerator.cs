@@ -117,15 +117,15 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             writer.WriteLine("{");
             writer.WriteLine($"\tpublic partial interface I{domainName}Service");
             writer.WriteLine("\t{");
-            writer.WriteLine($"\t\tpublic Task<IEnumerable<BusinessObjects.{domainName}>> GetAllAsync();");
+            writer.WriteLine($"\t\tpublic Task<IEnumerable<{domainName}>> GetAllAsync();");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic Task<BusinessObjects.{primaryBusinessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, true)});");
+            writer.WriteLine($"\t\tpublic Task<{primaryBusinessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, true)});");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Insert(BusinessObjects.{primaryBusinessObjectName} businessObject);");
+            writer.WriteLine($"\t\tpublic void Insert({primaryBusinessObjectName} businessObject);");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Update(BusinessObjects.{primaryBusinessObjectName} businessObject);");
+            writer.WriteLine($"\t\tpublic void Update({primaryBusinessObjectName} businessObject);");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Delete(BusinessObjects.{primaryBusinessObjectName} businessObject);");
+            writer.WriteLine($"\t\tpublic void Delete({primaryBusinessObjectName} businessObject);");
             writer.WriteLine("\t}");
             writer.WriteLine("}");
 

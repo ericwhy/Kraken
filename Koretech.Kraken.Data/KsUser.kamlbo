@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DomainObject Name="KsUser">
+<Domain Name="KsUser">
 	<BusinessObjects>
 		<BusinessObject Name="KsUser" SupportEventActions="true" EventMessageTypeCode="USER" DisplayTextFormat="{KsUserId}">
 			<Data Table="ks_user">

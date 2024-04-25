@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="KsMenu" Label="KsMenu" PrimaryObject="KsMenu" xmlns="http://koretech.com/Schemas/KAML.BO">
+  <BusinessObjects>
+    <BusinessObject Name="KsMenu" Label="KsMenu" DisplayTextFormat="{MenuName}">
+      <Data Table="ks_menu">
+        <Relations>
+          <Relation Name="ks_menu_ks_menu_item_REF" ReferenceName="ks_menu_ks_menu_item_REF_NAME" Type="Reference">
+            <KeyMap Table="ks_menu" Column="menu_no" ReferenceTable="ks_menu_item" ReferenceColumn="menu_no" />
+          </Relation>
+        </Relations>
+      </Data>
+      <ObjectRelations>
+        <InterDomain>
+          <ObjectRelation Name="MenuItems" ReferenceDomain="KsMenu" ReferenceObject="KsMenuItem" Type="Reference">
+            <ObjectKeyMap Property="MenuNo" ReferenceProperty="MenuNo" />
+          </ObjectRelation>
+        </InterDomain>
+      </ObjectRelations>
+      <Properties>
+        <BoundProperty Name="MenuNo" Label="Menu" Type="integer" Length="10" IsKey="true" ReadOnly="true" Required="true" Table="ks_menu" Column="menu_no" />
+        <BoundProperty Name="MenuId" Label="Menu Id" Type="character" Length="60" Required="true" Table="ks_menu" Column="menu_id" />
+        <BoundProperty Name="MenuName" Label="Menu Name" Type="character" Length="750" Table="ks_menu" Column="menu_name" />
+        <BoundProperty Name="FooterHtml" Label="Footer" Type="character" Length="2147483647" Table="ks_menu" Column="footer_html" />
+        <BoundProperty Name="Style" Label="Style" Type="character" Length="1" Required="true" Table="ks_menu" Column="style">
+          <Enumeration Name="KsMenuStyle">
+            <EnumeratedValue Label="Flyout" Value="F" />
+            <EnumeratedValue Label="Mega" Value="M" />
+            <EnumeratedValue Label="Slide" Value="S" />
+          </Enumeration>
+        </BoundProperty>
+        <BoundProperty Name="TitleVisibleFlg" Label="Title Visible" Type="yesno" Length="1" Required="true" DefaultValue="Y" Table="ks_menu" Column="title_visible_flg" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+    <BusinessObject Name="KsMenuItem" Label="KsMenuItem" DisplayTextFormat="{MenuTitle}">
+      <Data Table="ks_menu_item">
+        <Relations>
+          <Relation Name="ks_menu_ks_menu_item_FK" ReferenceName="ks_menu_ks_menu_item_FK_NAME" Type="Foreign">
+            <KeyMap Table="ks_menu_item" Column="menu_no" ReferenceTable="ks_menu" ReferenceColumn="menu_no" />
+          </Relation>
+          <Relation Name="ks_menu_item_ks_menu_item_FK" ReferenceName="ks_menu_item_ks_menu_item_FK_NAME" Type="Foreign">
+            <KeyMap Table="ks_menu_item" Column="parent_menu_item_no" ReferenceTable="ks_menu_item" ReferenceColumn="menu_item_no" />
+          </Relation>
+          <Relation Name="ks_menu_item_ks_menu_item_REF" ReferenceName="ks_menu_item_ks_menu_item_REF_NAME" Type="Reference">
+            <KeyMap Table="ks_menu_item" Column="menu_item_no" ReferenceTable="ks_menu_item" ReferenceColumn="parent_menu_item_no" />
+          </Relation>
+        </Relations>
+      </Data>
+      <ObjectRelations>
+        <InterDomain>
+          <ObjectRelation Name="KsMenuList" ReferenceDomain="KsMenu" ReferenceObject="KsMenu" Type="Foreign">
+            <ObjectKeyMap Property="MenuNo" ReferenceProperty="MenuNo" />
+          </ObjectRelation>
+          <ObjectRelation Name="KsMenuItemList" ReferenceDomain="KsMenu" ReferenceObject="KsMenuItem" Type="Reference">
+            <ObjectKeyMap Property="MenuItemNo" ReferenceProperty="ParentMenuItemNo" />
+          </ObjectRelation>
+        </InterDomain>
+        <OuterDomain>
+          <ObjectRelation Name="KsPageList" ReferenceDomain="KsPage" ReferenceObject="KsPage" Type="Foreign">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+        </OuterDomain>
+      </ObjectRelations>
+      <Properties>
+        <BoundProperty Name="MenuItemNo" Label="Menu Item" Type="integer" Length="10" IsKey="true" ReadOnly="true" Required="true" Table="ks_menu_item" Column="menu_item_no" />
+        <BoundProperty Name="MenuTitle" Label="Menu Title" Type="character" Length="750" Required="true" Table="ks_menu_item" Column="menu_title" />
+        <BoundProperty Name="MenuHref" Label="Menu Href" Type="character" Length="750" Table="ks_menu_item" Column="menu_href" />
+        <BoundProperty Name="MenuSeq" Label="Menu Seq" Type="integer" Length="10" Required="true" Table="ks_menu_item" Column="menu_seq" />
+        <BoundProperty Name="ResourceName" Label="Resource Name" Type="character" Length="750" Table="ks_menu_item" Column="resource_name" />
+        <BoundProperty Name="ParentMenuItemNo" Label="Parent Menu Item" Type="integer" Length="10" Table="ks_menu_item" Column="parent_menu_item_no" />
+        <BoundProperty Name="DisplaySeparatorBeforeFlg" Label="Display Separator Before" Type="yesno" Length="1" Required="true" Table="ks_menu_item" Column="display_separator_before_flg" />
+        <BoundProperty Name="IconCssClass" Label="Style-Sheet Class" Type="character" Length="750" Table="ks_menu_item" Column="icon_css_class" />
+        <BoundProperty Name="IconName" Label="Icon Name" Type="character" Length="128" Table="ks_menu_item" Column="icon_name" />
+        <BoundProperty Name="MenuNo" Label="Menu" Type="integer" Length="10" Table="ks_menu_item" Column="menu_no" />
+        <BoundProperty Name="PageName" Label="Page Name" Type="character" Length="128" Table="ks_menu_item" Column="page_name" />
+        <BoundProperty Name="PopupFlg" Label="Popup" Type="yesno" Length="1" Required="true" Table="ks_menu_item" Column="popup_flg" />
+        <BoundProperty Name="BodyHtml" Label="Body" Type="character" Length="2147483647" Table="ks_menu_item" Column="body_html" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+  </BusinessObjects>
+  <Applications>
+    <Application>webAdmin</Application>
+  </Applications>
+  <Scopes Function="kssf_scope_all" />
+</Domain>

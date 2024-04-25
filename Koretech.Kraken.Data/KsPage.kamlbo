@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="KsPage" Label="KsPage" PrimaryObject="KsPage" xmlns="http://koretech.com/Schemas/KAML.BO">
+  <BusinessObjects>
+    <BusinessObject Name="KsPage" Label="KsPage" DisplayTextFormat="{PageName}">
+      <Data Table="ks_page">
+        <Relations>
+          <Relation Name="ks_page_ks_page_content_REF" ReferenceName="ks_page_ks_page_content_REF_NAME" Type="Reference">
+            <KeyMap Table="ks_page" Column="page_name" ReferenceTable="ks_page_content" ReferenceColumn="page_name"/>
+          </Relation>
+          <Relation Name="ks_page_ks_page_object_REF" ReferenceName="ks_page_ks_page_object_REF_NAME" Type="Reference">
+            <KeyMap Table="ks_page" Column="page_name" ReferenceTable="ks_page_object" ReferenceColumn="page_name" />
+          </Relation>
+          <Relation Name="ks_page_ks_page_parameter_REF" ReferenceName="ks_page_ks_page_parameter_REF_NAME" Type="Reference">
+            <KeyMap Table="ks_page" Column="page_name" ReferenceTable="ks_page_parameter" ReferenceColumn="page_name" />
+          </Relation>
+          <Relation Name="ks_page_ks_page_security_REF" ReferenceName="ks_page_ks_page_security_REF_NAME" Type="Reference">
+            <KeyMap Table="ks_page" Column="page_name" ReferenceTable="ks_page_security" ReferenceColumn="page_name" />
+          </Relation>
+        </Relations>
+      </Data>
+      <ObjectRelations>
+        <InterDomain>
+          <ObjectRelation Name="KsPage_KsPageContent_REF" ReferenceDomain="KsPage" ReferenceObject="KsPageContent" Type="Reference">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+          <ObjectRelation Name="KsPage_KsPageObject_REF" ReferenceDomain="KsPage" ReferenceObject="KsPageObject" Type="Reference">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+          <ObjectRelation Name="KsPage_KsPageParameter_REF" ReferenceDomain="KsPage" ReferenceObject="KsPageParameter" Type="Reference">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+          <ObjectRelation Name="KsPage_KsPageSecurity_REF" ReferenceDomain="KsPage" ReferenceObject="KsPageSecurity" Type="Reference">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+        </InterDomain>
+      </ObjectRelations>
+      <Properties>
+        <BoundProperty Name="PageName" Label="Page Name" Type="character" Length="128" IsKey="true" Required="true" Table="ks_page" Column="page_name" />
+        <BoundProperty Name="Title" Label="Title" Type="character" Length="128" Table="ks_page" Column="title" />
+        <BoundProperty Name="LayoutName" Label="Layout Name" Type="character" Length="128" Table="ks_page" Column="layout_name" />
+        <BoundProperty Name="TypeCd" Label="Type Code" Type="character" Length="1" Table="ks_page" Column="type_cd">
+          <Enumeration Name="PageTypeCd">
+            <EnumeratedValue Value="S" Label="Static"/>
+            <EnumeratedValue Value="K" Label="Kaml"/>
+            <EnumeratedValue Value="V" Label="MVC"/>
+          </Enumeration>
+        </BoundProperty>
+        <BoundProperty Name="MetaDescription" Label="Meta Description" Type="character" Length="2147483647" Table="ks_page" Column="meta_description" />
+        <BoundProperty Name="MetaKeywords" Label="Meta Keywords" Type="character" Length="2147483647" Table="ks_page" Column="meta_keywords" />
+        <BoundProperty Name="AdditionalMetaElements" Label="Additional Meta Elements" Type="character" Length="2147483647" Table="ks_page" Column="add_meta_elements" />
+        <BoundProperty Name="Controller" Label="Controller" Type="character" Length="50" Table="ks_page" Column="controller" />
+        <BoundProperty Name="Action" Label="Action" Type="character" Length="50" Table="ks_page" Column="action" />
+        <BoundProperty Name="MetadataHash" Label="Metadata Hash" Type="bytes" Length="128" Table="ks_page" Column="metadata_hash" />
+        <BoundProperty Name="TitleVisibleFlg" Label="Title Visible" Type="yesno" Length="1" Required="true" DefaultValue="Y" Table="ks_page" Column="title_visible_flg" />
+        <BoundProperty Name="FullWidthFlg" Label="Full Width" Type="yesno" Length="1" Required="true" DefaultValue="N" Table="ks_page" Column="full_width_flg" />
+        <BoundProperty Name="LogicalPageName" Label="Logical Page Name" Type="character" Length="128" Required="true" Table="ks_page" Column="logical_page_name" />
+        <BoundProperty Name="RedirectPageName" Label="Redirect Page Name" Type="character" Length="128" Required="true" Table="ks_page" Column="redirect_page_name" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+    <BusinessObject Name="KsPageObject" Label="KsPageObject" DisplayTextFormat="{PageName}.{ObjectId}">
+      <Data Table="ks_page_object">
+        <Relations>
+          <Relation Name="ks_page_ks_page_object_FK" ReferenceName="ks_page_ks_page_object_FK_NAME" Type="Foreign">
+            <KeyMap Table="ks_page_object" Column="page_name" ReferenceTable="ks_page" ReferenceColumn="page_name" />
+          </Relation>
+        </Relations>
+      </Data>
+      <ObjectRelations>
+        <InterDomain>
+          <ObjectRelation Name="KsPage_KsPageObject_FK" ReferenceDomain="KsPage" ReferenceObject="KsPage" Type="Foreign">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+        </InterDomain>
+      </ObjectRelations>
+      <Properties>
+        <BoundProperty Name="PageName" Label="Page Name" Type="character" Length="128" IsKey="true" Required="true" Table="ks_page_object" Column="page_name" />
+        <BoundProperty Name="ObjectId" Label="Object Id" Type="character" Length="128" IsKey="true" Required="true" Table="ks_page_object" Column="object_id" />
+        <BoundProperty Name="PrimaryFlg" Label="Primary" Type="yesno" Length="1" Required="true" DefaultValue="N" Table="ks_page_object" Column="primary_flg" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+    <BusinessObject Name="KsPageSecurity" Label="KsPageSecurity" DisplayTextFormat="{PageName}.{RoleNo}" >
+      <Data Table="ks_page_security">
+        <Relations>
+          <Relation Name="ks_page_ks_page_security_FK" ReferenceName="ks_page_ks_page_security_FK_NAME" Type="Foreign">
+            <KeyMap Table="ks_page_security" Column="page_name" ReferenceTable="ks_page" ReferenceColumn="page_name" />
+          </Relation>
+        </Relations>
+      </Data>
+      <ObjectRelations>
+        <InterDomain>
+          <ObjectRelation Name="KsPage_KsPageSecurity_FK" ReferenceDomain="KsPage" ReferenceObject="KsPage" Type="Foreign">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+        </InterDomain>
+      </ObjectRelations>
+      <Properties>
+        <BoundProperty Name="PageName" Label="Page Name" Type="character" Length="128" IsKey="true" Required="true" Table="ks_page_security" Column="page_name" />
+        <BoundProperty Name="RoleNo" Label="Role" Type="integer" Length="10" IsKey="true" Required="true" Table="ks_page_security" Column="role_no" />
+        <BoundProperty Name="DenyAccessOverrideFlg" Label="Deny Access Override" Type="yesno" Length="1" Required="true" DefaultValue="N" Table="ks_page_security" Column="deny_access_override_flg" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+    <BusinessObject Name="KsPageParameter" Label="KsPageParameter" DisplayTextFormat="{PageName}.{ParameterName}">
+      <Data Table="ks_page_parameter">
+        <Relations>
+          <Relation Name="ks_page_ks_page_parameter_FK" ReferenceName="ks_page_ks_page_parameter_FK_NAME" Type="Foreign">
+            <KeyMap Table="ks_page_parameter" Column="page_name" ReferenceTable="ks_page" ReferenceColumn="page_name" />
+          </Relation>
+        </Relations>
+      </Data>
+      <ObjectRelations>
+        <InterDomain>
+          <ObjectRelation Name="KsPage_KsPageParameter_FK" ReferenceDomain="KsPage" ReferenceObject="KsPage" Type="Foreign">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+        </InterDomain>
+      </ObjectRelations>
+      <Properties>
+        <BoundProperty Name="PageName" Label="Page Name" Type="character" Length="128" IsKey="true" Required="true" Table="ks_page_parameter" Column="page_name" />
+        <BoundProperty Name="ParameterName" Label="Parameter Name" Type="character" Length="75" IsKey="true" Required="true" Table="ks_page_parameter" Column="parameter_name" />
+        <BoundProperty Name="ParameterType" Label="Parameter Type" Type="character" Length="256" Table="ks_page_parameter" Column="parameter_type" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+    <BusinessObject Name="KsPageContent" Label="KsPageContent" DisplayTextFormat="">
+      <Data Table="ks_page_content">
+        <Relations>
+          <Relation Name="ks_page_ks_page_content_FK" ReferenceName="ks_page_ks_page_content_FK_NAME" Type="Foreign">
+            <KeyMap Table="ks_page_content" Column="page_name" ReferenceTable="ks_page" ReferenceColumn="page_name" />
+          </Relation>
+        </Relations>
+      </Data>
+      <ObjectRelations>
+        <InterDomain>
+          <ObjectRelation Name="KsPage_KsPageContent_FK" ReferenceDomain="KsPage" ReferenceObject="KsPage" Type="Foreign">
+            <ObjectKeyMap Property="PageName" ReferenceProperty="PageName" />
+          </ObjectRelation>
+        </InterDomain>
+      </ObjectRelations>
+      <Properties>
+        <BoundProperty Name="PageName" Label="Page Name" Type="character" Length="128" IsKey="true" Required="true" Table="ks_page_content" Column="page_name" />
+        <BoundProperty Name="ZoneName" Label="Zone Name" Type="character" Length="128" Table="ks_page_content" Column="zone_name" />
+        <BoundProperty Name="ControlId" Label="Control Id" Type="character" Length="128" IsKey="true" Required="true" Table="ks_page_content" Column="control_id" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+  </BusinessObjects>
+  <Applications>
+    <Application>webAdmin</Application>
+  </Applications>
+  <Scopes Function="kssf_scope_all" />
+</Domain>
