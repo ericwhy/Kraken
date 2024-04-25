@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DomainObject Name="KsRole" PrimaryObject="KsRoleUser">
+  <BusinessObjects>
+    <BusinessObject Name="KsRoleUser" DisplayTextFormat="{RoleDesc}">
+      <Data Table="ks_role_user" />
+      <Relations>
+          <Relation Name="KsBindRoles" TargetObject="KsBindRole" Type="ToMany">
+            <KeyMap SourceProperty="RoleNo" TargetProperty="RoleNo" />
+          </Relation>
+          <Relation Name="KsUsers" TargetDomain="KsUser" TargetObject="KsUserRole" Type="ToMany">
+            <KeyMap SourceProperty="RoleNo" TargetProperty="RoleNo"/>
+          </Relation>
+          <Relation Name="KsObjectMethodSecurities" TargetDomain="KsObject" TargetObject="KsObjectMethodSecurity" Type="ToMany">
+            <KeyMap SourceProperty="RoleNo" TargetProperty="RoleNo"/>
+          </Relation>
+          <Relation Name="KsObjectPropertySecurities" TargetDomain="KsObject" TargetObject="KsObjectPropertySecurity" Type="ToMany">
+            <KeyMap SourceProperty="RoleNo" TargetProperty="RoleNo"/>
+          </Relation>
+          <Relation Name="KsPageSecurities" TargetDomain="KsPage" TargetObject="KsPageSecurity" Type="ToMany">
+            <KeyMap SourceProperty="RoleNo" TargetProperty="RoleNo"/>
+          </Relation>
+      </Relations>
+      <Properties>
+        <BoundProperty Name="RoleNo" Label="Role" Type="integer" Length="10" IsKey="true" Required="true" Column="role_no" IsIdentity="true" />
+        <BoundProperty Name="RoleDesc" Label="Role Description" Type="character" Length="255" Required="true" Column="role_desc" />
+        <BoundProperty Name="WebAssignFlg" Label="Web Assign" Type="yesno" Length="1" Required="true" Column="web_assign_flg" />
+        <BoundProperty Name="ImplicitAssignFlg" Label="Implicit Assign" Type="yesno" Length="1" Required="true" Column="implicit_assign_flg" />
+        <BoundProperty Name="HomePage" Label="Home Page" Type="character" Length="128" Column="home_page" />
+        <BoundProperty Name="HomePageQueryString" Label="Home Page Query String" Type="character" Length="128" Column="home_page_link_querystring" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+    <BusinessObject Name="KsBindRole" DisplayTextFormat="{IfColumnName}.{IfAttrName}">
+      <Data Table="ks_bind_role" />
+      <Relations>
+        <Relation Name="KsRoleUser" TargetObject="KsRoleUser" Type="ToOwnerMany">
+          <ObjectKeyMap Property="RoleNo" ReferenceProperty="RoleNo" />
+        </Relation>
+      </Relations>
+      <Properties>
+        <BoundProperty Name="RoleNo" Label="Role" Type="integer" Length="10" IsKey="true" Required="true" Column="role_no" />
+        <BoundProperty Name="IfColumnName" Label="If Column Name" Type="character" Length="30" Column="if_column_name" />
+        <BoundProperty Name="IfAttrName" Label="If Attr Name" Type="character" Length="30" Column="if_attr_name" />
+        <BoundProperty Name="IfOperator" Label="If Operator" Type="character" Length="2" Required="true" Column="if_operator" />
+        <BoundProperty Name="IfValue" Label="If Value" Type="character" Length="255" Column="if_value" />
+      </Properties>
+      <ExcludedColumns />
+    </BusinessObject>
+  </BusinessObjects>
+  <Applications>
+    <Application>webAdmin</Application>
+  </Applications>
+  <Scopes Function="kssf_scope_all" />
+</DomainObject>

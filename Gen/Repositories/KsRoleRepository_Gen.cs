@@ -9,44 +9,44 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Kraken.BusinessObjects.KsUser;
-using Koretech.Kraken.Contexts;
-using Koretech.Kraken.Entities.KsUser;
+using Koretech.Domains.Repositories;
+using Koretech.Domains.KsRoles.BusinessObjects;
+using Koretech.Domains.KsRoles.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Koretech.Kraken.Repositories
+namespace Koretech.Domains.KsRoles.Repositories
 {
-	internal class KsUserRepository : Repository<KsUserEntity>
+	internal partial class KsRoleRepository : Repository<KsRoleUserEntity>
 	{
-		public KsUserRepository(KsUserContext dbContext) : base(dbContext) { }
+		public KsRoleRepository(KsRoleContext dbContext) : base(dbContext) { }
 
-		public async Task<IEnumerable<KsUser>> GetAllAsync()
+		public async Task<IEnumerable<KsRoleUser>> GetAllAsync()
 		{
 			var entities = await FindAll()
 				.ToListAsync();
-			IList<KsUser> businessObjects = KsUser.NewInstance(entities);
+			IList<KsRoleUser> businessObjects = KsRoleUser.NewInstance(entities);
 			return businessObjects;
 		}
 
-		public async Task<KsUser?> GetByPrimaryKeyAsync(string KsUserId)
+		public async Task<KsRoleUser?> GetByPrimaryKeyAsync(int RoleNo)
 		{
-			KsUserEntity? entity = await FindByCondition(e => e.KsUserId.Equals(keyValue))
+			KsRoleUserEntity? entity = await FindByCondition(e => e.RoleNo.Equals(RoleNo))
 				.FirstOrDefaultAsync();
-			KsUser? businessObject = (entity != null) ? KsUser.NewInstance(entity) : null;
+			KsRoleUser? businessObject = (entity != null) ? KsRoleUser.NewInstance(entity) : null;
 			return businessObject;
 		}
 
-		public void Insert(KsUser businessObject)
+		public void Insert(KsRoleUser businessObject)
 		{
 			Insert(businessObject.Entity);
 		}
 
-		public void Update(KsUser businessObject)
+		public void Update(KsRoleUser businessObject)
 		{
 			Update(businessObject.Entity);
 		}
 
-		public void Delete(KsUser businessObject)
+		public void Delete(KsRoleUser businessObject)
 		{
 			Delete(businessObject.Entity);
 		}

@@ -1,4 +1,4 @@
-﻿using Koretech.Kraken.Kaml;
+﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
@@ -14,78 +14,74 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// <summary>
         /// Creates the subdirectory for storing entityBO files in a specific domain if it doesn't already exist.
         /// </summary>
-        public void CreateDomainSubdirectory()
+        public void CreateDomainSubdirectory(KamlBoDomain domain)
         {
-            outputRootDirectory.GetDirectories(servicesPath).Single().CreateSubdirectory(DomainRoot.Name);
+            outputRootDirectory.GetDirectories(servicesPath).Single().CreateSubdirectory(domain.Name);
         }
 
         /// <summary>
         /// Generates the two classes that make up a service based on a KAML BO specification.
-        /// This should only be called once per domain, for the root entity.
         /// </summary>
-        /// <param name="rootEntity">KAML BO specification for the root of the domain</param>
-        public void CreateServiceFile(KamlBoEntity rootEntity)
+        /// <param name="domain">The root of the KAML BO specification - the domain</param>
+        protected override void DoGenerate(KamlBoDomain domain)
         {
-            _ = DomainRoot ?? throw new InvalidOperationException($"DomainRoot must be set before calling {nameof(CreateServiceFile)}");
-
-            string businessObjectName = rootEntity.Name;
-            string entityName = businessObjectName + "Entity";
-            string domainName = DomainRoot.Name;
             string entityFullPath = Path.Combine(outputRootDirectory.FullName, servicesPath);
 
-            CreateServiceClassFile(rootEntity, domainName, entityName, businessObjectName, entityFullPath);
-            CreateServiceInterfaceFile(rootEntity, domainName, entityName, businessObjectName, entityFullPath);
+            CreateServiceClassFile(domain, entityFullPath);
+            CreateServiceInterfaceFile(domain, entityFullPath);
         }
 
         /// <summary>
         /// Generates a service class from a KAML BO specification.
-        /// This should only be called once per domain, for the root entity.
         /// </summary>
-        /// <param name="rootEntity">KAML BO specification for the domain root</param>
-        private void CreateServiceClassFile(KamlBoEntity rootEntity, string domainName, string entityName, string businessObjectName, string entityFullPath)
+        /// <param name="domain">model of the KAML BO specification root - the domain</param>
+        private void CreateServiceClassFile(KamlBoDomain domain, string entityFullPath)
         {
-            string sourceFileName = Path.Combine(entityFullPath, $"{businessObjectName}Service.cs");
+            string domainName = domain.Name;
+            string domainPackageName = domainName + "s";
+            string primaryBusinessObjectName = domain.PrimaryEntityName;
+            string sourceFileName = Path.Combine(entityFullPath, $"{domainName}Service_Gen.cs");
             {
                 File.Delete(sourceFileName);
             }
             var writer = File.CreateText(sourceFileName);
             writer.Write(GetFileHeader());
             writer.WriteLine();
-            writer.WriteLine($"using Koretech.Infrastructure.Services.{businessObjectName}.BusinessObjects;");
-            writer.WriteLine($"using Koretech.Infrastructure.Services.{businessObjectName}.Repositories;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.BusinessObjects;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.Repositories;");
             writer.WriteLine();
-            writer.WriteLine($"namespace Koretech.Infrastructure.Services.{businessObjectName}");
+            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}");
             writer.WriteLine("{");
-            writer.WriteLine($"\tinternal class {businessObjectName}Service : I{businessObjectName}Service");
+            writer.WriteLine($"\tinternal partial class {domainName}Service : I{domainName}Service");
             writer.WriteLine("\t{");
-            writer.WriteLine($"\t\tprivate {businessObjectName}Repository _repository;");
+            writer.WriteLine($"\t\tprivate {domainName}Repository _repository;");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic {businessObjectName}Service({businessObjectName}Repository repository)");
+            writer.WriteLine($"\t\tpublic {domainName}Service({domainName}Repository repository)");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\t_repository = repository;");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic async Task<IEnumerable<{businessObjectName}>> GetAllAsync()");
+            writer.WriteLine($"\t\tpublic async Task<IEnumerable<{primaryBusinessObjectName}>> GetAllAsync()");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\treturn await _repository.GetAllAsync();");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic async Task<{businessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(rootEntity, true)})");
+            writer.WriteLine($"\t\tpublic async Task<{primaryBusinessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, true)})");
             writer.WriteLine("\t\t{");
-            writer.WriteLine($"\t\t\treturn await _repository.GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(rootEntity, false)});");
+            writer.WriteLine($"\t\t\treturn await _repository.GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, false)});");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Insert({businessObjectName} businessObject)");
+            writer.WriteLine($"\t\tpublic void Insert({primaryBusinessObjectName} businessObject)");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\t_repository.Insert(businessObject);");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Update({businessObjectName} businessObject)");
+            writer.WriteLine($"\t\tpublic void Update({primaryBusinessObjectName} businessObject)");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\t_repository.Update(businessObject);");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Delete({businessObjectName} businessObject)");
+            writer.WriteLine($"\t\tpublic void Delete({primaryBusinessObjectName} businessObject)");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\t_repository.Delete(businessObject);");
             writer.WriteLine("\t\t}");
@@ -101,34 +97,35 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// Generates a service interface from a KAML BO specification.
         /// This should only be called once per domain, for the root entity.
         /// </summary>
-        /// <param name="rootEntity">KAML BO specification for the domain root</param>
-        private void CreateServiceInterfaceFile(KamlBoEntity rootEntity, string domainName, string entityName, string businessObjectName, string entityFullPath)
+        /// <param name="domain">model of the KAML BO specification root - the domain</param>
+        private void CreateServiceInterfaceFile(KamlBoDomain domain, string entityFullPath)
         {
-            string sourceFileName = Path.Combine(entityFullPath, $"I{businessObjectName}Service.cs");
+            string domainName = domain.Name;
+            string domainPackageName = domainName + "s";
+            string primaryBusinessObjectName = domain.PrimaryEntityName;
+            string sourceFileName = Path.Combine(entityFullPath, $"I{domainName}Service_Gen.cs");
             {
                 File.Delete(sourceFileName);
             }
             var writer = File.CreateText(sourceFileName);
             writer.Write(GetFileHeader());
             writer.WriteLine();
-            writer.WriteLine($"using Koretech.Infrastructure.Services.{businessObjectName}.BusinessObjects;");
-            writer.WriteLine($"using Koretech.Infrastructure.Services.{businessObjectName}.Repositories;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.BusinessObjects;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.Repositories;");
             writer.WriteLine();
-            writer.WriteLine($"namespace Koretech.Infrastructure.Services.{businessObjectName}");
+            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}");
             writer.WriteLine("{");
-            writer.WriteLine($"\tpublic interface I{businessObjectName}Service");
+            writer.WriteLine($"\tpublic partial interface I{domainName}Service");
             writer.WriteLine("\t{");
-            writer.WriteLine($"\t\tpublic {businessObjectName}Service({businessObjectName}Repository repository);");
+            writer.WriteLine($"\t\tpublic Task<IEnumerable<BusinessObjects.{domainName}>> GetAllAsync();");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic async Task<IEnumerable<{businessObjectName}>> GetAllAsync();");
+            writer.WriteLine($"\t\tpublic Task<BusinessObjects.{primaryBusinessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, true)});");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic async Task<{businessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(rootEntity, true)});");
+            writer.WriteLine($"\t\tpublic void Insert(BusinessObjects.{primaryBusinessObjectName} businessObject);");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Insert({businessObjectName} businessObject);");
+            writer.WriteLine($"\t\tpublic void Update(BusinessObjects.{primaryBusinessObjectName} businessObject);");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Update({businessObjectName} businessObject);");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Delete({businessObjectName} businessObject);");
+            writer.WriteLine($"\t\tpublic void Delete(BusinessObjects.{primaryBusinessObjectName} businessObject);");
             writer.WriteLine("\t}");
             writer.WriteLine("}");
 

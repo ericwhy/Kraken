@@ -9,16 +9,17 @@
 /*                                                      */
 /********************************************************/
 
-namespace Koretech.Infrastructure.Services.KsUser.Entities
+
+namespace Koretech.Domains.KsUsers.Entities
 {
 	public class KsUserLoginFailureEntity
 	{
 	
-		public string KsUserId {get; set;} = string.Empty;
+		public string KsUserId { get; set; } = string.Empty;
 
-		public DateTime FailDt {get; set;} = DateTime.Now;
+		public DateTime FailDt { get; set; } = DateTime.Now;
 
-		public IList<KsUserEntity> User {get; set;} = new List<KsUserEntity>();  // Navigation property to owner KsUserEntity
+		public IList<KsUserEntity> User { get; set; } = new List<KsUserEntity>();  // Navigation property to owner KsUserEntity
 
 	}
 }

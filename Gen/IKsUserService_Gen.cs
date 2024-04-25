@@ -9,21 +9,21 @@
 /*                                                      */
 /********************************************************/
 
+using Koretech.Domains.KsUsers.BusinessObjects;
+using Koretech.Domains.KsUsers.Repositories;
 
-namespace Koretech.Domains.KsUsers.Entities
+namespace Koretech.Domains.KsUsers
 {
-	public class PasswordHistoryEntity
+	public partial interface IKsUserService
 	{
-	
-		public string KsUserId { get; set; } = string.Empty;
+		public Task<IEnumerable<BusinessObjects.KsUser>> GetAllAsync();
 
-		public string? Password { get; set; }
+		public Task<BusinessObjects.KsUser?> GetByPrimaryKeyAsync(string KsUserId);
 
-		public string? PasswordSalt { get; set; }
+		public void Insert(BusinessObjects.KsUser businessObject);
 
-		public DateTime CreateDt { get; set; } = DateTime.Now;
+		public void Update(BusinessObjects.KsUser businessObject);
 
-		public IList<KsUserEntity> KsUser { get; set; } = new List<KsUserEntity>();  // Navigation property to owner KsUserEntity
-
+		public void Delete(BusinessObjects.KsUser businessObject);
 	}
 }

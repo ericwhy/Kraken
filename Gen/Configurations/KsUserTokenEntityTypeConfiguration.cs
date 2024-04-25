@@ -1,12 +1,19 @@
-//
-// Created by Kraken KAML BO Generator
-//
+/********************************************************/
+/*                                                      */
+/* Created by Kraken KAML BO Generator                  */
+/*                                                      */
+/* DO NOT MODIFY                                        */
+/*                                                      */
+/* Extensions or overrides should be placed in a        */
+/* subclass or partial class, whichever is appropriate. */
+/*                                                      */
+/********************************************************/
 
-using Koretech.Kraken.Entities.KsUser;
+using Koretech.Domains.KsUsers.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Koretech.Kraken.Data.Configurations
+namespace Koretech.Domains.KsUsers.EntityConfigurations
 {
 	public class KsUserTokenEntityTypeConfiguration : IEntityTypeConfiguration<KsUserTokenEntity>
 	{

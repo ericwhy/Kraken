@@ -1,4 +1,4 @@
-﻿using Koretech.Kraken.Kaml;
+﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
 using System.Text;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
@@ -14,11 +14,6 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         }
 
         /// <summary>
-        /// The entity that is at the root of the DDD domain.
-        /// </summary>
-        public KamlBoEntity DomainRoot { get; set; } = null!;
-
-        /// <summary>
         /// Creates the subdirectory for storing BO files if it doesn't already exist.
         /// </summary>
         /// <param name="path"></param>
@@ -29,6 +24,19 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 outputRootDirectory.CreateSubdirectory(generatePath);
             }
         }
+
+        /// <summary>
+        /// Here is where we generate the output file.
+        /// </summary>
+        public void Generate(KamlBoDomain domain)
+        {
+            DoGenerate(domain);
+        }
+
+        /// <summary>
+        /// A place for concrete implementation for generating the output file.
+        /// </summary>
+        protected abstract void DoGenerate(KamlBoDomain domain);
 
         /// <summary>
         /// Generates the header lines that appear at the top of every generated code file.

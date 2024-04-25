@@ -9,81 +9,83 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Domains.KsUsers.Entities;
+using Koretech.Domains.KsRoles.Entities;
 using Koretech.Platform.BusinessObjects;
 using System.Collections;
-using Koretech.Domains.KsRoles.BusinessObjects;
 
-
-namespace Koretech.Domains.KsUsers.BusinessObjects
+namespace Koretech.Domains.KsRoles.BusinessObjects
 {
 	/// <summary>
-	/// This business object class wraps the domain entity KsUserRoleEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsBindRoleEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public abstract class KsUserRoleBase : BusinessObject
+	public abstract class KsBindRoleBase : BusinessObject
 	{
 
-		private KsUserRoleEntity _entity;
+		private KsBindRoleEntity _entity;
 
 		/// <summary>
 		/// Constructor.  Protected to force use of the static factory method NewInstance().
 		/// </summary>
 		/// <param name="entity">An entity that provides data for the business object</param>
-		protected KsUserRoleBase(KsUserRoleEntity entity)
+		protected KsBindRoleBase(KsBindRoleEntity entity)
 		{
 			_entity = entity;
 		}
 
-		public KsUserRoleBase()
+		public KsBindRoleBase()
 		{
 			_entity = new();
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the business object class.
-		/// Override when you need to do work in the KsUserRole(entity) constructor.
+		/// Override when you need to do work in the KsBindRole(entity) constructor.
 		/// </summary>
 		protected virtual void Initialize() { }
 
-		internal KsUserRoleEntity Entity
+		internal KsBindRoleEntity Entity
 		{
 			get => _entity;
 		}
 
 		#region Entity Properties
 
-		public virtual string KsUserId
-		{
-			get => _entity.KsUserId;
-			set => _entity.KsUserId = value;
-		}
-
-		public virtual string ResourceType
-		{
-			get => _entity.ResourceType;
-			set => _entity.ResourceType = value;
-		}
-
-		public virtual string ResourceName
-		{
-			get => _entity.ResourceName;
-			set => _entity.ResourceName = value;
-		}
-
-		public virtual int RoleNo
+		public virtual int? RoleNo
 		{
 			get => _entity.RoleNo;
 			set => _entity.RoleNo = value;
+		}
+
+		public virtual string? IfColumnName
+		{
+			get => _entity.IfColumnName;
+			set => _entity.IfColumnName = value;
+		}
+
+		public virtual string? IfAttrName
+		{
+			get => _entity.IfAttrName;
+			set => _entity.IfAttrName = value;
+		}
+
+		public virtual string? IfOperator
+		{
+			get => _entity.IfOperator;
+			set => _entity.IfOperator = value;
+		}
+
+		public virtual string? IfValue
+		{
+			get => _entity.IfValue;
+			set => _entity.IfValue = value;
 		}
 
 		#endregion Entity Properties
 
 		#region Relationships
 
-		public List<KsUser> User = new();
-
-		public KsRoleUser? Role;
+		public List<KsRoleUser> KsRoleUser = new();
 
 		#endregion Relationships
 

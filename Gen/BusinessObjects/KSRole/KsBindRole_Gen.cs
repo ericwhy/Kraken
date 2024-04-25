@@ -9,16 +9,16 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Domains.KsUsers.Entities;
+using Koretech.Domains.KsRoles.Entities;
 using System.Collections;
 
-namespace Koretech.Domains.KsUsers.BusinessObjects
+namespace Koretech.Domains.KsRoles.BusinessObjects
 {
 	/// <summary>
-	/// This business object class wraps the domain entity PasswordHistoryEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsBindRoleEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public partial class PasswordHistory : PasswordHistoryBase
+	public partial class KsBindRole : KsBindRoleBase
 	{
 		#region Static Methods
 
@@ -29,17 +29,17 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// </summary>
 		/// <param name="entity">The entity to create a business object from</param>
 		/// <returns>A newly created business object wrapping the provided entity</returns>
-		public static PasswordHistory NewInstance(PasswordHistoryEntity entity)
+		public static KsBindRole NewInstance(KsBindRoleEntity entity)
 		{
-			PasswordHistory businessObject = new(entity);
+			KsBindRole businessObject = new(entity);
 
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			if (entity.KsUser != null)
+			if (entity.KsRoleUser != null)
 			{
-				IList<KsUser> newKsUser = BusinessObjects.KsUser.NewInstance(entity.KsUser);
-				businessObject.KsUser.AddRange(newKsUser);
+				IList<KsRoleUser> newKsRoleUser = BusinessObjects.KsRoleUser.NewInstance(entity.KsRoleUser);
+				businessObject.KsRoleUser.AddRange(newKsRoleUser);
 			}
 
 			return businessObject;
@@ -52,22 +52,22 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// </summary>
 		/// <param name="entities">The entities to create business objects from</param>
 		/// <returns>A newly created business object(s) wrapping the provided entities</returns>
-		public static IList<PasswordHistory> NewInstance(IList<PasswordHistoryEntity> entities)
+		public static IList<KsBindRole> NewInstance(IList<KsBindRoleEntity> entities)
 		{
-			List<PasswordHistory> businessObjects = new();
+			List<KsBindRole> businessObjects = new();
 
-			foreach (PasswordHistoryEntity entity in entities)
+			foreach (KsBindRoleEntity entity in entities)
 			{
-				PasswordHistory newBusinessObject = new(entity);
+				KsBindRole newBusinessObject = new(entity);
 				businessObjects.Add(newBusinessObject);
 
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				if (entity.KsUser != null)
+				if (entity.KsRoleUser != null)
 				{
-					IList<KsUser> newKsUser = BusinessObjects.KsUser.NewInstance(entity.KsUser);
-					newBusinessObject.KsUser.AddRange(newKsUser);
+					IList<KsRoleUser> newKsRoleUser = BusinessObjects.KsRoleUser.NewInstance(entity.KsRoleUser);
+					newBusinessObject.KsRoleUser.AddRange(newKsRoleUser);
 				}
 			}
 
@@ -80,7 +80,7 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// Create a new instance of this class by wrapping an entity.
 		/// </summary>
 		/// <param name="entity">the entity to wrap</param>
-		protected PasswordHistory(PasswordHistoryEntity entity) : base(entity)
+		protected KsBindRole(KsBindRoleEntity entity) : base(entity)
 		{
 			Initialize();
 		}

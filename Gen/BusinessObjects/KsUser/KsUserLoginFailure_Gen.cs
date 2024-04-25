@@ -9,10 +9,10 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Infrastructure.Services.KsUser.Entities;
+using Koretech.Domains.KsUsers.Entities;
 using System.Collections;
 
-namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
+namespace Koretech.Domains.KsUsers.BusinessObjects
 {
 	/// <summary>
 	/// This business object class wraps the domain entity KsUserLoginFailureEntity and provides access to the entity's data
@@ -36,8 +36,11 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			IList<KsUser> newKsUser = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser.NewInstance(entity.User);
-			businessObject.User.AddRange(newKsUser);
+			if (entity.User != null)
+			{
+				IList<KsUser> newKsUser = BusinessObjects.KsUser.NewInstance(entity.User);
+				businessObject.User.AddRange(newKsUser);
+			}
 
 			return businessObject;
 		}
@@ -61,13 +64,25 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				IList<KsUser> newKsUser = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser.NewInstance(entity.User);
-				newBusinessObject.User.AddRange(newKsUser);
+				if (entity.User != null)
+				{
+					IList<KsUser> newKsUser = BusinessObjects.KsUser.NewInstance(entity.User);
+					newBusinessObject.User.AddRange(newKsUser);
+				}
 			}
 
 			return businessObjects;
 		}
 
 		#endregion Static Methods
+
+		/// <summary>
+		/// Create a new instance of this class by wrapping an entity.
+		/// </summary>
+		/// <param name="entity">the entity to wrap</param>
+		protected KsUserLoginFailure(KsUserLoginFailureEntity entity) : base(entity)
+		{
+			Initialize();
+		}
 	}
 }

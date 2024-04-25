@@ -9,23 +9,21 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Infrastructure.Services.KsUser.BusinessObjects;
-using Koretech.Infrastructure.Services.KsUser.Repositories;
+using Koretech.Domains.KsRoles.BusinessObjects;
+using Koretech.Domains.KsRoles.Repositories;
 
-namespace Koretech.Infrastructure.Services.KsUser
+namespace Koretech.Domains.KsRoles
 {
-	public interface IKsUserService
+	public partial interface IKsRoleService
 	{
-		public KsUserService(KsUserRepository repository);
+		public Task<IEnumerable<BusinessObjects.KsRole>> GetAllAsync();
 
-		public async Task<IEnumerable<KsUser>> GetAllAsync();
+		public Task<BusinessObjects.KsRoleUser?> GetByPrimaryKeyAsync(int RoleNo);
 
-		public async Task<KsUser?> GetByPrimaryKeyAsync(string KsUserId);
+		public void Insert(BusinessObjects.KsRoleUser businessObject);
 
-		public void Insert(KsUser businessObject);
+		public void Update(BusinessObjects.KsRoleUser businessObject);
 
-		public void Update(KsUser businessObject);
-
-		public void Delete(KsUser businessObject);
+		public void Delete(BusinessObjects.KsRoleUser businessObject);
 	}
 }

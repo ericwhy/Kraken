@@ -9,41 +9,41 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Infrastructure.Services.KsUser.BusinessObjects;
-using Koretech.Infrastructure.Services.KsUser.Repositories;
+using Koretech.Domains.KsRoles.BusinessObjects;
+using Koretech.Domains.KsRoles.Repositories;
 
-namespace Koretech.Infrastructure.Services.KsUser
+namespace Koretech.Domains.KsRoles
 {
-	internal class KsUserService : IKsUserService
+	internal partial class KsRoleService : IKsRoleService
 	{
-		private KsUserRepository _repository;
+		private KsRoleRepository _repository;
 
-		public KsUserService(KsUserRepository repository)
+		public KsRoleService(KsRoleRepository repository)
 		{
 			_repository = repository;
 		}
 
-		public async Task<IEnumerable<KsUser>> GetAllAsync()
+		public async Task<IEnumerable<KsRoleUser>> GetAllAsync()
 		{
 			return await _repository.GetAllAsync();
 		}
 
-		public async Task<KsUser?> GetByPrimaryKeyAsync(string KsUserId)
+		public async Task<KsRoleUser?> GetByPrimaryKeyAsync(int RoleNo)
 		{
-			return await _repository.GetByPrimaryKeyAsync(KsUserId);
+			return await _repository.GetByPrimaryKeyAsync(RoleNo);
 		}
 
-		public void Insert(KsUser businessObject)
+		public void Insert(KsRoleUser businessObject)
 		{
 			_repository.Insert(businessObject);
 		}
 
-		public void Update(KsUser businessObject)
+		public void Update(KsRoleUser businessObject)
 		{
 			_repository.Update(businessObject);
 		}
 
-		public void Delete(KsUser businessObject)
+		public void Delete(KsRoleUser businessObject)
 		{
 			_repository.Delete(businessObject);
 		}

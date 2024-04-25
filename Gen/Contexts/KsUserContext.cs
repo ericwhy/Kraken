@@ -1,12 +1,19 @@
-//
-// Created by Kraken KAML BO Generator
-//
+/********************************************************/
+/*                                                      */
+/* Created by Kraken KAML BO Generator                  */
+/*                                                      */
+/* DO NOT MODIFY                                        */
+/*                                                      */
+/* Extensions or overrides should be placed in a        */
+/* subclass or partial class, whichever is appropriate. */
+/*                                                      */
+/********************************************************/
 
-using Koretech.Kraken.Data.Configurations;
-using Koretech.Kraken.Entities.KsUser;
+using Koretech.Domains.KsUsers.Entities;
+using Koretech.Domains.KsUsers.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Koretech.Kraken.Data
+namespace Koretech.Domains.KsUsers.Repositories
 {
 	public class KsUserContext : DbContext
 	{
@@ -36,7 +43,7 @@ namespace Koretech.Kraken.Data
 			new KsUserTokenEntityTypeConfiguration().Configure(modelBuilder.Entity<KsUserTokenEntity>());
 
 			modelBuilder.HasDefaultSchema("ks");
-			modelBuilder.HasDbFunction(typeof(KsUserContext).GetMethod(nameof(KsUserEntityScope)))
+			modelBuilder.HasDbFunction(typeof(KsUserContext).GetMethod(nameof(KsUserEntityScope))!)
 				.HasName("kssf_scope_ksuser");
 		}
 	}

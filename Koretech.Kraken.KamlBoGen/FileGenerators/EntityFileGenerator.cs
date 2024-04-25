@@ -1,4 +1,4 @@
-﻿using Koretech.Kraken.Kaml;
+﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
@@ -14,21 +14,32 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// <summary>
         /// Creates the subdirectory for storing entityBO files in a specific domain if it doesn't already exist.
         /// </summary>
-        public void CreateDomainSubdirectory()
+        public void CreateDomainSubdirectory(KamlBoDomain domain)
         {
-            outputRootDirectory.GetDirectories(entitiesPath).Single().CreateSubdirectory(DomainRoot.Name);
+            outputRootDirectory.GetDirectories(entitiesPath).Single().CreateSubdirectory(domain.Name);
         }
 
         /// <summary>
         /// Generates an entity class from a KAML BO specification.
         /// </summary>
-        /// <param name="entity">KAML BO specification</param>
-        public void CreateEntityFile(KamlBoEntity entity)
+        /// <param name="domain">root of the model of the KAML BO specification, i.e. the domain</param>
+        protected override void DoGenerate(KamlBoDomain domain)
         {
-            _ = DomainRoot ?? throw new InvalidOperationException($"DomainRoot must be set before calling {nameof(CreateEntityFile)}");
+            foreach (KamlBoEntity entity in domain.Entities) 
+            {
+                CreateEntityFile(entity);
+            }
+        }
 
+        /// <summary>
+        /// Generates an entity class from a KAML BO specification.
+        /// </summary>
+        /// <param name="entity">BO specification from the KAML BO</param>
+        private void CreateEntityFile(KamlBoEntity entity) 
+        { 
             string entityName = entity.Name;
-            string domainName = DomainRoot.Name;
+            string domainName = entity.Domain.Name;
+            string domainPackageName = domainName + "s";
             string entityFullPath = Path.Combine(outputRootDirectory.FullName, entitiesPath);
             string domainFullPath = Path.Combine(entityFullPath, domainName);
             string sourceFileName = Path.Combine(domainFullPath, $"{entityName}Entity.cs");
@@ -38,7 +49,26 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             var writer = File.CreateText(sourceFileName);
             writer.Write(GetFileHeader());
             writer.WriteLine();
-            writer.WriteLine($"namespace Koretech.Infrastructure.Services.{domainName}.Entities");
+            
+            // Usings
+            if (entity.HasCrossDomainRelationship) 
+            {
+                List<string> targetDomains = new();
+                foreach (KamlEntityRelation relation in entity.Relations.Where(r => r.IsCrossDomain))
+                {
+                    if (relation.TargetDomain != null && !targetDomains.Contains(relation.TargetDomain))
+                    {
+                        string targetDomainPackageName = relation.TargetDomain + "s";
+                        writer.WriteLine($"using Koretech.Domains.{targetDomainPackageName}.Entities;");
+                        targetDomains.Add(relation.TargetDomain);   
+                    }
+                }
+                writer.WriteLine();
+            }
+            writer.WriteLine();
+
+            // Class
+            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}.Entities");
             writer.WriteLine("{");
             writer.WriteLine($"\tpublic class {entityName}Entity");
             writer.WriteLine("\t{");
@@ -113,7 +143,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string nullableChar = property.IsRequired ? string.Empty : "?";
             writer.Write($"\t\tpublic string{nullableChar} {property.Name}");
-            writer.Write(" {get; set;}");
+            writer.Write(" { get; set; }");
             if (property.IsRequired)
             {
                 writer.Write(" = string.Empty;");
@@ -125,7 +155,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string nullableChar = property.IsRequired ? string.Empty : "?";
             writer.Write($"\t\tpublic DateTime{nullableChar} {property.Name}");
-            writer.Write(" {get; set;}");
+            writer.Write(" { get; set; }");
             if (property.IsRequired)
             {
                 writer.Write(" = DateTime.Now;");
@@ -137,7 +167,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string nullableChar = property.IsRequired ? string.Empty : "?";
             writer.Write($"\t\tpublic int{nullableChar} {property.Name}");
-            writer.Write(" {get; set;}");
+            writer.Write(" { get; set; }");
             writer.WriteLine();
         }
 
@@ -145,7 +175,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string nullableChar = property.IsRequired ? string.Empty : "?";
             writer.Write($"\t\tpublic Guid{nullableChar} {property.Name}");
-            writer.Write(" {get; set;}");
+            writer.Write(" { get; set; }");
             writer.WriteLine();
         }
 
@@ -153,7 +183,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string nullableChar = property.IsRequired ? string.Empty : "?";
             writer.Write($"\t\tpublic byte[]{nullableChar} {property.Name}");
-            writer.Write(" {get; set;}");
+            writer.Write(" { get; set; }");
             if (property.IsRequired)
             {
                 writer.Write($" = new byte[{property.Length}];");
@@ -165,7 +195,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string nullableChar = property.IsRequired ? string.Empty : "?";
             writer.Write($"\t\tpublic byte{nullableChar} {property.Name}");
-            writer.Write(" {get; set;}");
+            writer.Write(" { get; set; }");
             writer.WriteLine();
         }
 
@@ -173,7 +203,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string nullableChar = property.IsRequired ? string.Empty : "?";
             writer.Write($"\t\tpublic char{nullableChar} {property.Name}");
-            writer.Write(" {get; set;}");
+            writer.Write(" { get; set; }");
             writer.WriteLine();
         }
 
@@ -181,7 +211,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string targetEntityType = $"{relation.TargetEntity}Entity";
             string relationType = (relation.IsToOwnerOne || relation.IsToOwnerMany) ? "owner" : "child";
-            writer.Write($"\t\tpublic IList<{targetEntityType}> {relation.Name} {{get; set;}}");
+            writer.Write($"\t\tpublic IList<{targetEntityType}> {relation.Name} {{ get; set; }}");
             writer.Write($" = new List<{targetEntityType}>();  // Navigation property to {relationType} {targetEntityType}");
             writer.WriteLine();
         }
@@ -190,7 +220,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             string targetEntityType = $"{relation.TargetEntity}Entity";
             string relationType = (relation.IsToOwnerOne || relation.IsToOwnerMany) ? "owner" : "child";
-            writer.Write($"\t\tpublic {targetEntityType} {relation.Name} {{get; set;}}");
+            writer.Write($"\t\tpublic {targetEntityType}? {relation.Name} {{ get; set; }} = null;"); // We make relationships nullable in entities to avoid compile errors in the generated code.
             writer.Write($"  // Navigation property to {relationType} {targetEntityType}");  //TODO: How to initialize?  Can't use new() due to recursion.
             writer.WriteLine();
         }

@@ -10,22 +10,22 @@
 /********************************************************/
 
 
-using Koretech.Infrastructure.Services.KsUser.Entities;
-using Koretech.Infrastructure.Services.KsUser.Repositories;
-using KsUserBO = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser;
-
-namespace Koretech.Infrastructure.Services.KsUser
+namespace Koretech.Domains.KsRoles.Entities
 {
-	internal interface IKsUserService
+	public class KsBindRoleEntity
 	{
-		public Task<IEnumerable<KsUserBO>> GetAllAsync();
+	
+		public int? RoleNo { get; set; }
 
-		public Task<KsUserBO?> GetByPrimaryKeyAsync(string KsUserId);
+		public string? IfColumnName { get; set; }
 
-		public void Insert(KsUserBO businessObject);
+		public string? IfAttrName { get; set; }
 
-		public void Update(KsUserBO businessObject);
+		public string? IfOperator { get; set; }
 
-		public void Delete(KsUserBO businessObject);
+		public string? IfValue { get; set; }
+
+		public IList<KsRoleUserEntity> KsRoleUser { get; set; } = new List<KsRoleUserEntity>();  // Navigation property to owner KsRoleUserEntity
+
 	}
 }

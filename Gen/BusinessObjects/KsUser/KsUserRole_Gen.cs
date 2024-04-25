@@ -9,10 +9,12 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Infrastructure.Services.KsUser.Entities;
+using Koretech.Domains.KsUsers.Entities;
 using System.Collections;
+using Koretech.Domains.KsRoles.BusinessObjects;
 
-namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
+
+namespace Koretech.Domains.KsUsers.BusinessObjects
 {
 	/// <summary>
 	/// This business object class wraps the domain entity KsUserRoleEntity and provides access to the entity's data
@@ -36,10 +38,16 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			IList<KsUser> newKsUser = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser.NewInstance(entity.User);
-			businessObject.User.AddRange(newKsUser);
+			if (entity.User != null)
+			{
+				IList<KsUser> newKsUser = BusinessObjects.KsUser.NewInstance(entity.User);
+				businessObject.User.AddRange(newKsUser);
+			}
 
-			businessObject.Role = KsRoleUser.NewInstance(entity.Role);
+			if (entity.Role != null)
+			{
+				businessObject.Role = KsRoleUser.NewInstance(entity.Role);
+			}
 
 			return businessObject;
 		}
@@ -63,15 +71,30 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				IList<KsUser> newKsUser = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUser.NewInstance(entity.User);
-				newBusinessObject.User.AddRange(newKsUser);
+				if (entity.User != null)
+				{
+					IList<KsUser> newKsUser = BusinessObjects.KsUser.NewInstance(entity.User);
+					newBusinessObject.User.AddRange(newKsUser);
+				}
 
-				newBusinessObject.Role = KsRoleUser.NewInstance(entity.Role);
+				if (entity.Role != null)
+				{
+					newBusinessObject.Role =  KsRoleUser.NewInstance(entity.Role);
+				}
 			}
 
 			return businessObjects;
 		}
 
 		#endregion Static Methods
+
+		/// <summary>
+		/// Create a new instance of this class by wrapping an entity.
+		/// </summary>
+		/// <param name="entity">the entity to wrap</param>
+		protected KsUserRole(KsUserRoleEntity entity) : base(entity)
+		{
+			Initialize();
+		}
 	}
 }

@@ -9,16 +9,17 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Infrastructure.Services.KsUser.Entities;
+using Koretech.Domains.KsUsers.Entities;
+using Koretech.Platform.BusinessObjects;
 using System.Collections;
 
-namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
+namespace Koretech.Domains.KsUsers.BusinessObjects
 {
 	/// <summary>
 	/// This business object class wraps the domain entity KsUserEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public abstract class KsUserBase
+	public abstract class KsUserBase : BusinessObject
 	{
 
 		private KsUserEntity _entity;
@@ -36,6 +37,12 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 		{
 			_entity = new();
 		}
+
+		/// <summary>
+		/// Initializes a new instance of the business object class.
+		/// Override when you need to do work in the KsUser(entity) constructor.
+		/// </summary>
+		protected virtual void Initialize() { }
 
 		internal KsUserEntity Entity
 		{
@@ -92,10 +99,10 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 			set => _entity.AllowAccessFlg = value;
 		}
 
-		public virtual char IntegratedAuth
+		public virtual char IsGuest
 		{
-			get => _entity.IntegratedAuth;
-			set => _entity.IntegratedAuth = value;
+			get => _entity.IsGuest;
+			set => _entity.IsGuest = value;
 		}
 
 		public virtual char AuthPrompt
@@ -122,17 +129,23 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 			set => _entity.FailedLoginDt = value;
 		}
 
+		public virtual string? SecurityStamp
+		{
+			get => _entity.SecurityStamp;
+			set => _entity.SecurityStamp = value;
+		}
+
 		#endregion Entity Properties
 
 		#region Relationships
 
-		public virtual List<KsUserLoginFailure> LoginFailures = new();
+		public List<KsUserLoginFailure> LoginFailures = new();
 
-		public virtual List<PasswordHistory> PasswordHistory = new();
+		public List<PasswordHistory> PasswordHistory = new();
 
-		public virtual List<KsUserRole> UserRoles = new();
+		public List<KsUserRole> UserRoles = new();
 
-		public virtual KsUserToken UserToken;
+		public KsUserToken? UserToken;
 
 		#endregion Relationships
 

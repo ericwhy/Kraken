@@ -1,4 +1,4 @@
-﻿using Koretech.Kraken.Kaml;
+﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
@@ -14,62 +14,60 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
 
         /// <summary>
         /// Generates a repository class from a KAML BO specification.
-        /// This should only be called once per domain, for the root entity.
         /// </summary>
-        /// <param name="rootEntity">KAML BO specification for the domain root</param>
-        public void CreateRepositoryFile(KamlBoEntity rootEntity)
+        /// <param name="domain">The root of the KAML BO specification - the domain</param>
+        protected override void DoGenerate(KamlBoDomain domain)
         {
-            _ = DomainRoot ?? throw new InvalidOperationException($"DomainRoot must be set before calling {nameof(CreateRepositoryFile)}");
-
-            string businessObjectName = rootEntity.Name;
-            string entityName = businessObjectName + "Entity";
-            string domainName = DomainRoot.Name;
+            string primaryEntityName = domain.PrimaryEntityName;
+            string entityName = primaryEntityName + "Entity";
+            string domainName = domain.Name;
+            string domainPackageName = domainName + "s";
             string entityFullPath = Path.Combine(outputRootDirectory.FullName, repositoriesPath);
-            string sourceFileName = Path.Combine(entityFullPath, $"{businessObjectName}Repository.cs");
+            string sourceFileName = Path.Combine(entityFullPath, $"{domainName}Repository_Gen.cs");
             {
                 File.Delete(sourceFileName);
             }
             var writer = File.CreateText(sourceFileName);
             writer.Write(GetFileHeader());
             writer.WriteLine();
-            writer.WriteLine($"using Koretech.Kraken.BusinessObjects.{businessObjectName};");
-            writer.WriteLine("using Koretech.Kraken.Contexts;");
-            writer.WriteLine($"using Koretech.Kraken.Entities.{businessObjectName};");
+            writer.WriteLine($"using Koretech.Domains.Repositories;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.BusinessObjects;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.Entities;");
             writer.WriteLine("using Microsoft.EntityFrameworkCore;");
             writer.WriteLine();
-            writer.WriteLine($"namespace Koretech.Kraken.Repositories");
+            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}.Repositories");
             writer.WriteLine("{");
-            writer.WriteLine($"\tinternal class {businessObjectName}Repository : Repository<{entityName}>");
+            writer.WriteLine($"\tinternal partial class {domainName}Repository : Repository<{entityName}>");
             writer.WriteLine("\t{");
-            writer.WriteLine($"\t\tpublic {businessObjectName}Repository({businessObjectName}Context dbContext) : base(dbContext) {{ }}");
+            writer.WriteLine($"\t\tpublic {domainName}Repository({domainName}Context dbContext) : base(dbContext) {{ }}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic async Task<IEnumerable<{businessObjectName}>> GetAllAsync()");
+            writer.WriteLine($"\t\tpublic async Task<IEnumerable<{primaryEntityName}>> GetAllAsync()");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\tvar entities = await FindAll()");
             writer.WriteLine("\t\t\t\t.ToListAsync();");
-            writer.WriteLine($"\t\t\tIList<{businessObjectName}> businessObjects = {businessObjectName}.NewInstance(entities);");
+            writer.WriteLine($"\t\t\tIList<{primaryEntityName}> businessObjects = {primaryEntityName}.NewInstance(entities);");
             writer.WriteLine("\t\t\treturn businessObjects;");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic async Task<{businessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(rootEntity, true)})");
+            writer.WriteLine($"\t\tpublic async Task<{primaryEntityName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, true)})");
             writer.WriteLine("\t\t{");
-            writer.WriteLine($"\t\t\t{entityName}? entity = await FindByCondition({GetPrimaryKeyAsCondition(rootEntity)})");
+            writer.WriteLine($"\t\t\t{entityName}? entity = await FindByCondition({GetPrimaryKeyAsCondition(domain.PrimaryEntity)})");
             writer.WriteLine("\t\t\t\t.FirstOrDefaultAsync();");
-            writer.WriteLine($"\t\t\t{businessObjectName}? businessObject = (entity != null) ? {businessObjectName}.NewInstance(entity) : null;");
+            writer.WriteLine($"\t\t\t{primaryEntityName}? businessObject = (entity != null) ? {primaryEntityName}.NewInstance(entity) : null;");
             writer.WriteLine("\t\t\treturn businessObject;");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Insert({businessObjectName} businessObject)");
+            writer.WriteLine($"\t\tpublic void Insert({primaryEntityName} businessObject)");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\tInsert(businessObject.Entity);");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Update({businessObjectName} businessObject)");
+            writer.WriteLine($"\t\tpublic void Update({primaryEntityName} businessObject)");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\tUpdate(businessObject.Entity);");
             writer.WriteLine("\t\t}");
             writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Delete({businessObjectName} businessObject)");
+            writer.WriteLine($"\t\tpublic void Delete({primaryEntityName} businessObject)");
             writer.WriteLine("\t\t{");
             writer.WriteLine("\t\t\tDelete(businessObject.Entity);");
             writer.WriteLine("\t\t}");
@@ -101,7 +99,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                     {
                         result += " && ";
                     }
-                    result += $"e.{property.Name}.Equals(keyValue)";
+                    result += $"e.{property.Name}.Equals({property.Name})";
                 }
             }
             return result;

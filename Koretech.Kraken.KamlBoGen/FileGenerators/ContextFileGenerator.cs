@@ -1,4 +1,4 @@
-﻿using Koretech.Kraken.Kaml;
+﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
@@ -16,13 +16,13 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// <summary>
         /// Generates an EF context class from a KAML BO specification.
         /// </summary>
-        /// <param name="entity">All KAML BO specifications for the domain</param>
-        public void CreateContextFile(List<KamlBoEntity> entities)
+        /// <param name="domain">model of the KAML BO specification for the domain</param>
+        protected override void DoGenerate(KamlBoDomain domain)
         {
-            _ = DomainRoot ?? throw new InvalidOperationException($"DomainRoot must be set before calling {nameof(CreateContextFile)}");
-
-            string domainName = DomainRoot.Name;
-            IEnumerable<string> ownedEntityNames = entities
+            string domainName = domain.Name;
+            string domainPackageName = domainName + "s";
+            string primaryEntityName = domain.PrimaryEntityName;
+            IEnumerable<string> ownedEntityNames = domain.Entities
                 .Where(e => !e.IsDomainPrimary)
                 .Select(e => e.Name);
 
@@ -34,15 +34,13 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             }
 
             var writer = File.CreateText(sourceFileName);
-            writer.WriteLine("//");
-            writer.WriteLine("// Created by Kraken KAML BO Generator");
-            writer.WriteLine("//");
+            writer.Write(GetFileHeader());
             writer.WriteLine();
-            writer.WriteLine("using Koretech.Kraken.Data.Configurations;");
-            writer.WriteLine("using Koretech.Kraken.Entities.KsUser;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.Entities;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.EntityConfigurations;");
             writer.WriteLine("using Microsoft.EntityFrameworkCore;");
             writer.WriteLine();
-            writer.WriteLine("namespace Koretech.Kraken.Data");
+            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}.Repositories");
             writer.WriteLine("{");
             writer.WriteLine($"\tpublic class {domainName}Context : DbContext");
             writer.WriteLine("\t{");
@@ -51,10 +49,10 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             writer.WriteLine($"\t\tpublic {domainName}Context(DbContextOptions<{domainName}Context> options) : base(options) {{ }}");
             writer.WriteLine();
 
-            writer.WriteLine($"\t\tpublic virtual DbSet<{domainName}Entity> {domainName}s {{ get; set; }}"); //TODO: Fix plural on property naming
-            foreach (string objectName in ownedEntityNames)
+            writer.WriteLine($"\t\tpublic virtual DbSet<{primaryEntityName}Entity> {primaryEntityName}s {{ get; set; }}"); //TODO: Fix plural on property naming
+            foreach (string ownedEntityName in ownedEntityNames)
             {
-                writer.WriteLine($"\t\tpublic virtual DbSet<{objectName}Entity> {objectName}s {{ get; set; }}");
+                writer.WriteLine($"\t\tpublic virtual DbSet<{ownedEntityName}Entity> {ownedEntityName}s {{ get; set; }}");
             }
             writer.WriteLine();
 
@@ -62,7 +60,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             {
                 writer.WriteLine("\t\t#region Scope Functions");
                 writer.WriteLine();
-                writer.WriteLine($"\t\tpublic IQueryable<{domainName}Entity> {domainName}EntityScope(string userId, string objectId, string methodName, int? scopeOverride)");
+                writer.WriteLine($"\t\tpublic IQueryable<{primaryEntityName}Entity> {domainName}EntityScope(string userId, string objectId, string methodName, int? scopeOverride)");
                 writer.WriteLine($"\t\t\t=> FromExpression(() => {domainName}EntityScope(userId, objectId, methodName, scopeOverride));");
                 writer.WriteLine();
                 writer.WriteLine("\t\t#endregion Scope Functions");
@@ -71,14 +69,14 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
 
             writer.WriteLine("\t\tprotected override void OnModelCreating(ModelBuilder modelBuilder)");
             writer.WriteLine("\t\t{");
-            writer.WriteLine($"\t\t\tnew {domainName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{domainName}Entity>());");
-            foreach (string objectName in ownedEntityNames)
+            writer.WriteLine($"\t\t\tnew {primaryEntityName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{primaryEntityName}Entity>());");
+            foreach (string ownedEntityName in ownedEntityNames)
             {
-                writer.WriteLine($"\t\t\tnew {objectName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{objectName}Entity>());");
+                writer.WriteLine($"\t\t\tnew {ownedEntityName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{ownedEntityName}Entity>());");
             }
             writer.WriteLine();
             writer.WriteLine("\t\t\tmodelBuilder.HasDefaultSchema(\"ks\");");
-            writer.WriteLine($"\t\t\tmodelBuilder.HasDbFunction(typeof({domainName}Context).GetMethod(nameof({domainName}EntityScope)))");
+            writer.WriteLine($"\t\t\tmodelBuilder.HasDbFunction(typeof({domainName}Context).GetMethod(nameof({domainName}EntityScope))!)");
             writer.WriteLine($"\t\t\t\t.HasName(\"{ScopeFunction}\");");
             writer.WriteLine("\t\t}");
 

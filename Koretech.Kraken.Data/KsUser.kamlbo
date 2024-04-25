@@ -1,114 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Domain Name="KSUser">
-  <BusinessObjects>
-    <BusinessObject Name="KsUser" SupportEventActions="true" EventMessageTypeCode="USER" DisplayTextFormat="{KsUserId}">
-      <Data Table="ks_user">
-      </Data>
-      <Relations>
-        <Relation Name="LoginFailures" TargetObject="KsUserLoginFailure" Type="ToMany">
-            <KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
-        </Relation>
-        <Relation Name="PasswordHistory" TargetObject="PasswordHistory" Type="ToMany">
-            <KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
-        </Relation>
-        <Relation Name="UserRoles" TargetObject="KsUserRole" Type="ToMany">
-            <KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
-        </Relation>
-        <Relation Name="UserToken" TargetObject="KsUserToken" Type="ToOne">
-            <ObjectKeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
-        </Relation>
-      </Relations>
-      <Properties>
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
-        <BoundProperty Name="DisplayName" Label="Display Name" Type="character" Length="750" Column="display_name" />
-        <BoundProperty Name="EmailAddress" Label="Email Address" Type="character" Length="750" IsRequired="true" Column="email_address" />
-        <BoundProperty Name="PasswordHints" Label="Password Hints" Type="character" Length="30" Column="password_hints" />
-        <BoundProperty Name="Password" Label="Password" Type="character" Length="256" Column="password" />
-        <BoundProperty Name="PasswordSalt" Label="Password Salt" Type="character" Length="256" Column="password_salt" />
-        <BoundProperty Name="PasswordDt" Label="Password Date" Type="datetime" Length="23" IsRequired="true" Column="password_dt" />
-        <BoundProperty Name="AllowAccessFlg" Label="Allow Access" Type="yesno" Length="1" IsRequired="true" Column="allow_access_flg" >
-          <Enumeration Name="AllowAccessFlgs">
-            <EnumeratedValue Value="Y" Label="Yes"/>
-            <EnumeratedValue Value="N" Label="No"/>
-          </Enumeration>
-        </BoundProperty>
-        <BoundProperty Name="IntegratedAuth" Label="Integrated Auth" Type="yesno" Length="1" IsRequired="true" Column="integrated_auth" />
-        <BoundProperty Name="AuthPrompt" Label="Auth Prompt" Type="yesno" Length="1" IsRequired="true" Column="auth_prompt" />
-        <BoundProperty Name="PwresetFlg" Label="Pwreset" Type="yesno" Length="1" IsRequired="true" Column="pwreset_flg" />
-        <BoundProperty Name="FailedLoginCnt" Label="Failed Login Cnt" Type="byte" DefaultValue="0" Length="3" Column="failed_login_cnt" />
-        <BoundProperty Name="FailedLoginDt" Label="Failed Login Date" Type="datetime" Length="23" Column="failed_login_dt" />
-      </Properties>
-    </BusinessObject>
-    <BusinessObject Name="KsUserLoginFailure">
-      <Data Table="ks_user_login_failure">
-      </Data>
-      <Relations>
-        <Relation Name="User" TargetObject="KsUser" Type="ToOwnerMany">
-            <ObjectKeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
-        </Relation>
-      </Relations>
-      <Properties>
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
-        <BoundProperty Name="FailDt" Label="Fail Date" Type="datetime" Length="23" IsKey="true" IsRequired="true" Column="fail_dt" />
-      </Properties>
-    </BusinessObject>
-    <BusinessObject Name="KsUserRole">
-      <Data Table="ks_user_role">
-      </Data>
-      <Relations>
-        <Relation Name="User" TargetObject="KsUser" Type="ToOwnerMany">
-           <KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
-        </Relation>
-        <Relation Name="Role" TargetDomain="KSRole" TargetObject="KsRoleUser" Type="ToOne">
-            <KeyMap SourceProperty="RoleNo" TargetProperty="RoleNo" />
-        </Relation>
-      </Relations>
-      <Properties>
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
-        <BoundProperty Name="ResourceType" Label="Resource Type" Type="character" Length="20" IsKey="true" IsRequired="true" Column="resource_type" />
-        <BoundProperty Name="ResourceName" Label="Resource Name" Type="character" Length="20" IsKey="true" IsRequired="true" Column="resource_name" />
-        <BoundProperty Name="RoleNo" Label="Role" Type="integer" Length="10" IsKey="true" IsRequired="true" Column="role_no" />
-      </Properties>
-    </BusinessObject>
-    <BusinessObject Name="PasswordHistory">
-      <Data Table="password_history">
-      </Data>
-      <Relations>
-        <Relation Name="KsUser" TargetObject="KsUser" Type="ToOwnerMany">
-            <KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
-        </Relation>
-      </Relations>
-      <Properties>
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
-        <BoundProperty Name="Password" Label="Password" Type="character" Length="256" IsKey="true" Column="password" />
-        <BoundProperty Name="PasswordSalt" Label="Password Salt" Type="character" Length="256" Column="password_salt" />
-        <BoundProperty Name="CreateDt" Label="Create Date" Type="datetime" Length="23" IsRequired="true" Column="create_dt" />
-      </Properties>
-    </BusinessObject>
-    <BusinessObject Name="KsUserToken">
-      <Data Table="ks_user_token">
-      </Data>
-      <Relations>
-        <Relation Name="KsUser" TargetObject="KsUser" Type="ToOwnerOne">
-            <KeyMap Property="KsUserId" ReferenceProperty="KsUserId" />
-        </Relation>
-      </Relations>
-      <Properties>
-        <BoundProperty Name="TokenNo" Label="Token" Type="integer" Length="10" IsKey="true" IsIdentity="true" IsRequired="true" Column="token_no" />
-        <BoundProperty Name="Selector" Label="Selector" Type="uniqueidentifier" Length="16" IsRequired="true" Column="selector" />
-        <BoundProperty Name="ValidatorHash" Label="Validator Hash" Type="bytes" Length="32" IsRequired="true" Column="validator_hash" />
-        <BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsRequired="true" Column="ks_user_id" />
-        <BoundProperty Name="ExpirationDt" Label="Expiration Date" Type="datetime" Length="23" IsRequired="true" Column="expiration_dt" />
-      </Properties>
-    </BusinessObject>
-  </BusinessObjects>
-  <Applications>
-    <Application>webAdmin</Application>
-  </Applications>
-  <Scopes Function="kssf_scope_ksuser">
-    <Scope>MASTERCOMPANY</Scope>
-    <Scope>REPCOMPANY</Scope>
-    <Scope>COMPANY</Scope>
-    <Scope>OWNER</Scope>
-  </Scopes>
-</Domain>
+<DomainObject Name="KsUser">
+	<BusinessObjects>
+		<BusinessObject Name="KsUser" SupportEventActions="true" EventMessageTypeCode="USER" DisplayTextFormat="{KsUserId}">
+			<Data Table="ks_user">
+			</Data>
+			<Relations>
+				<Relation Name="LoginFailures" TargetObject="KsUserLoginFailure" Type="ToMany">
+					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+				</Relation>
+				<Relation Name="PasswordHistory" TargetObject="PasswordHistory" Type="ToMany">
+					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+				</Relation>
+				<Relation Name="UserRoles" TargetObject="KsUserRole" Type="ToMany">
+					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+				</Relation>
+				<Relation Name="UserToken" TargetObject="KsUserToken" Type="ToOne">
+					<ObjectKeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+				</Relation>
+			</Relations>
+			<Properties>
+				<BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
+				<BoundProperty Name="DisplayName" Label="Display Name" Type="character" Length="750" Column="display_name" />
+				<BoundProperty Name="EmailAddress" Label="Email Address" Type="character" Length="750" IsRequired="true" Column="email_address" />
+				<BoundProperty Name="PasswordHints" Label="Password Hints" Type="character" Length="30" Column="password_hints" />
+				<BoundProperty Name="Password" Label="Password" Type="character" Length="256" Column="password" />
+				<BoundProperty Name="PasswordSalt" Label="Password Salt" Type="character" Length="256" Column="password_salt" />
+				<BoundProperty Name="PasswordDt" Label="Password Date" Type="datetime" Length="23" IsRequired="true" Column="password_dt" />
+				<BoundProperty Name="AllowAccessFlg" Label="Allow Access" Type="yesno" Length="1" IsRequired="true" Column="allow_access_flg" >
+					<Enumeration Name="AllowAccessFlgs">
+						<EnumeratedValue Value="Y" Label="Yes"/>
+						<EnumeratedValue Value="N" Label="No"/>
+					</Enumeration>
+				</BoundProperty>
+				<BoundProperty Name="IsGuest" Label="Is Guest" Type="yesno" Length="1" IsRequired="true" Column="is_guest" />
+				<BoundProperty Name="AuthPrompt" Label="Auth Prompt" Type="yesno" Length="1" IsRequired="true" Column="auth_prompt" />
+				<BoundProperty Name="PwresetFlg" Label="Pwreset" Type="yesno" Length="1" IsRequired="true" Column="pwreset_flg" />
+				<BoundProperty Name="FailedLoginCnt" Label="Failed Login Cnt" Type="byte" DefaultValue="0" Length="3" Column="failed_login_cnt" />
+				<BoundProperty Name="FailedLoginDt" Label="Failed Login Date" Type="datetime" Length="23" Column="failed_login_dt" />
+				<BoundProperty Name="SecurityStamp" Label="Security Stamp" Type="character" Length="-1" Column="security_stamp" />
+			</Properties>
+		</BusinessObject>
+		<BusinessObject Name="KsUserLoginFailure">
+			<Data Table="ks_user_login_failure">
+			</Data>
+			<Relations>
+				<Relation Name="User" TargetObject="KsUser" Type="ToOwnerMany">
+					<ObjectKeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+				</Relation>
+			</Relations>
+			<Properties>
+				<BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
+				<BoundProperty Name="FailDt" Label="Fail Date" Type="datetime" Length="23" IsKey="true" IsRequired="true" Column="fail_dt" />
+			</Properties>
+		</BusinessObject>
+		<BusinessObject Name="KsUserRole">
+			<Data Table="ks_user_role">
+			</Data>
+			<Relations>
+				<Relation Name="User" TargetObject="KsUser" Type="ToOwnerMany">
+					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+				</Relation>
+				<Relation Name="Role" TargetDomain="KsRole" TargetObject="KsRoleUser" Type="ToOne">
+					<KeyMap SourceProperty="RoleNo" TargetProperty="RoleNo" />
+				</Relation>
+			</Relations>
+			<Properties>
+				<BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
+				<BoundProperty Name="ResourceType" Label="Resource Type" Type="character" Length="20" IsKey="true" IsRequired="true" Column="resource_type" />
+				<BoundProperty Name="ResourceName" Label="Resource Name" Type="character" Length="20" IsKey="true" IsRequired="true" Column="resource_name" />
+				<BoundProperty Name="RoleNo" Label="Role" Type="integer" Length="10" IsKey="true" IsRequired="true" Column="role_no" />
+			</Properties>
+		</BusinessObject>
+		<BusinessObject Name="PasswordHistory">
+			<Data Table="password_history">
+			</Data>
+			<Relations>
+				<Relation Name="KsUser" TargetObject="KsUser" Type="ToOwnerMany">
+					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+				</Relation>
+			</Relations>
+			<Properties>
+				<BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsKey="true" IsRequired="true" Column="ks_user_id" />
+				<BoundProperty Name="Password" Label="Password" Type="character" Length="256" IsKey="true" Column="password" />
+				<BoundProperty Name="PasswordSalt" Label="Password Salt" Type="character" Length="256" Column="password_salt" />
+				<BoundProperty Name="CreateDt" Label="Create Date" Type="datetime" Length="23" IsRequired="true" Column="create_dt" />
+			</Properties>
+		</BusinessObject>
+		<BusinessObject Name="KsUserToken">
+			<Data Table="ks_user_token">
+			</Data>
+			<Relations>
+				<Relation Name="KsUser" TargetObject="KsUser" Type="ToOwnerOne">
+					<KeyMap Property="KsUserId" ReferenceProperty="KsUserId" />
+				</Relation>
+			</Relations>
+			<Properties>
+				<BoundProperty Name="TokenNo" Label="Token" Type="integer" Length="10" IsKey="true" IsIdentity="true" IsRequired="true" Column="token_no" />
+				<BoundProperty Name="Selector" Label="Selector" Type="uniqueidentifier" Length="16" IsRequired="true" Column="selector" />
+				<BoundProperty Name="ValidatorHash" Label="Validator Hash" Type="bytes" Length="32" IsRequired="true" Column="validator_hash" />
+				<BoundProperty Name="KsUserId" Label="Ks User Id" Type="character" Length="60" IsRequired="true" Column="ks_user_id" />
+				<BoundProperty Name="ExpirationDt" Label="Expiration Date" Type="datetime" Length="23" IsRequired="true" Column="expiration_dt" />
+			</Properties>
+		</BusinessObject>
+	</BusinessObjects>
+	<Applications>
+		<Application>webAdmin</Application>
+	</Applications>
+	<Scopes Function="kssf_scope_ksuser">
+		<Scope>MASTERCOMPANY</Scope>
+		<Scope>REPCOMPANY</Scope>
+		<Scope>COMPANY</Scope>
+		<Scope>OWNER</Scope>
+	</Scopes>
+</DomainObject>

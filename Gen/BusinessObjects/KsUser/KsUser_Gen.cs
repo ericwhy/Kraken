@@ -9,10 +9,10 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Infrastructure.Services.KsUser.Entities;
+using Koretech.Domains.KsUsers.Entities;
 using System.Collections;
 
-namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
+namespace Koretech.Domains.KsUsers.BusinessObjects
 {
 	/// <summary>
 	/// This business object class wraps the domain entity KsUserEntity and provides access to the entity's data
@@ -36,16 +36,28 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			IList<KsUserLoginFailure> newKsUserLoginFailure = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUserLoginFailure.NewInstance(entity.LoginFailures);
-			businessObject.LoginFailures.AddRange(newKsUserLoginFailure);
+			if (entity.LoginFailures != null)
+			{
+				IList<KsUserLoginFailure> newKsUserLoginFailure = BusinessObjects.KsUserLoginFailure.NewInstance(entity.LoginFailures);
+				businessObject.LoginFailures.AddRange(newKsUserLoginFailure);
+			}
 
-			IList<PasswordHistory> newPasswordHistory = Koretech.Infrastructure.Services.KsUser.BusinessObjects.PasswordHistory.NewInstance(entity.PasswordHistory);
-			businessObject.PasswordHistory.AddRange(newPasswordHistory);
+			if (entity.PasswordHistory != null)
+			{
+				IList<PasswordHistory> newPasswordHistory = BusinessObjects.PasswordHistory.NewInstance(entity.PasswordHistory);
+				businessObject.PasswordHistory.AddRange(newPasswordHistory);
+			}
 
-			IList<KsUserRole> newKsUserRole = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUserRole.NewInstance(entity.UserRoles);
-			businessObject.UserRoles.AddRange(newKsUserRole);
+			if (entity.UserRoles != null)
+			{
+				IList<KsUserRole> newKsUserRole = BusinessObjects.KsUserRole.NewInstance(entity.UserRoles);
+				businessObject.UserRoles.AddRange(newKsUserRole);
+			}
 
-			businessObject.UserToken = KsUserToken.NewInstance(entity.UserToken);
+			if (entity.UserToken != null)
+			{
+				businessObject.UserToken = BusinessObjects.KsUserToken.NewInstance(entity.UserToken);
+			}
 
 			return businessObject;
 		}
@@ -69,21 +81,42 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				IList<KsUserLoginFailure> newKsUserLoginFailure = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUserLoginFailure.NewInstance(entity.LoginFailures);
-				newBusinessObject.LoginFailures.AddRange(newKsUserLoginFailure);
+				if (entity.LoginFailures != null)
+				{
+					IList<KsUserLoginFailure> newKsUserLoginFailure = BusinessObjects.KsUserLoginFailure.NewInstance(entity.LoginFailures);
+					newBusinessObject.LoginFailures.AddRange(newKsUserLoginFailure);
+				}
 
-				IList<PasswordHistory> newPasswordHistory = Koretech.Infrastructure.Services.KsUser.BusinessObjects.PasswordHistory.NewInstance(entity.PasswordHistory);
-				newBusinessObject.PasswordHistory.AddRange(newPasswordHistory);
+				if (entity.PasswordHistory != null)
+				{
+					IList<PasswordHistory> newPasswordHistory = BusinessObjects.PasswordHistory.NewInstance(entity.PasswordHistory);
+					newBusinessObject.PasswordHistory.AddRange(newPasswordHistory);
+				}
 
-				IList<KsUserRole> newKsUserRole = Koretech.Infrastructure.Services.KsUser.BusinessObjects.KsUserRole.NewInstance(entity.UserRoles);
-				newBusinessObject.UserRoles.AddRange(newKsUserRole);
+				if (entity.UserRoles != null)
+				{
+					IList<KsUserRole> newKsUserRole = BusinessObjects.KsUserRole.NewInstance(entity.UserRoles);
+					newBusinessObject.UserRoles.AddRange(newKsUserRole);
+				}
 
-				newBusinessObject.UserToken = KsUserToken.NewInstance(entity.UserToken);
+				if (entity.UserToken != null)
+				{
+					newBusinessObject.UserToken =  BusinessObjects.KsUserToken.NewInstance(entity.UserToken);
+				}
 			}
 
 			return businessObjects;
 		}
 
 		#endregion Static Methods
+
+		/// <summary>
+		/// Create a new instance of this class by wrapping an entity.
+		/// </summary>
+		/// <param name="entity">the entity to wrap</param>
+		protected KsUser(KsUserEntity entity) : base(entity)
+		{
+			Initialize();
+		}
 	}
 }

@@ -40,7 +40,7 @@ class Program
                 Console.WriteLine("Output directory does not exist!");
             }
         }
-        KamlBoGen gen = new(kamlSource, outputDirectory);
+        KamlBoGen.KamlBoGen gen = new(kamlSource, outputDirectory);
         gen.Generate();
     }
 }

@@ -1,12 +1,19 @@
-//
-// Created by Kraken KAML BO Generator
-//
+/********************************************************/
+/*                                                      */
+/* Created by Kraken KAML BO Generator                  */
+/*                                                      */
+/* DO NOT MODIFY                                        */
+/*                                                      */
+/* Extensions or overrides should be placed in a        */
+/* subclass or partial class, whichever is appropriate. */
+/*                                                      */
+/********************************************************/
 
-using Koretech.Kraken.Entities.KsUser;
+using Koretech.Domains.KsUsers.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Koretech.Kraken.Data.Configurations
+namespace Koretech.Domains.KsUsers.EntityConfigurations
 {
 	public class KsUserEntityTypeConfiguration : IEntityTypeConfiguration<KsUserEntity>
 	{
@@ -60,12 +67,12 @@ namespace Koretech.Kraken.Data.Configurations
 				.IsFixedLength()
 				.HasColumnName("allow_access_flg");
 
-			typeBuilder.Property(e => e.IntegratedAuth)
+			typeBuilder.Property(e => e.IsGuest)
 				.HasMaxLength(1)
 				.IsUnicode(false)
 				.HasDefaultValueSql("('N')")
 				.IsFixedLength()
-				.HasColumnName("integrated_auth");
+				.HasColumnName("is_guest");
 
 			typeBuilder.Property(e => e.AuthPrompt)
 				.HasMaxLength(1)
@@ -89,6 +96,10 @@ namespace Koretech.Kraken.Data.Configurations
 				.HasDefaultValueSql("(getdate())")
 				.HasColumnType("datetime")
 				.HasColumnName("failed_login_dt");
+
+			typeBuilder.Property(e => e.SecurityStamp)
+				.IsUnicode(false)
+				.HasColumnName("security_stamp");
 
 		}
 	}

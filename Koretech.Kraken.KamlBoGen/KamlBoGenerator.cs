@@ -1,9 +1,8 @@
-using Koretech.Kraken.KamlBoGen;
 using Koretech.Kraken.KamlBoGen.FileGenerators;
-using System.Net;
+using Koretech.Kraken.KamlBoGen.KamlBoModel;
 using System.Xml.Linq;
 
-namespace Koretech.Kraken.Kaml
+namespace Koretech.Kraken.KamlBoGen
 {
     public class KamlBoGen {
         public KamlBoGen(FileInfo source, DirectoryInfo outPath) {
@@ -13,21 +12,6 @@ namespace Koretech.Kraken.Kaml
 
         public FileInfo SourceKamlBo { get; private set; }
         public DirectoryInfo OutputRoot { get; private set; }
-
-        private const string NameA = "Name";
-        private const string LabelA = "Label";
-        private const string TypeA = "Type";
-        private const string LengthA = "Length";
-        private const string IsRequiredA = "IsRequired";
-        private const string IsKeyA = "IsKey";
-        private const string IsIdentityA = "IsIdentity";
-        private const string IsFixedLengthA = "IsFixedLength";
-        private const string TableA = "Table";
-        private const string ColumnA = "Column";
-        private const string TargetObjectA = "TargetObject";
-        private const string SourcePropertyA = "SourceProperty";
-        private const string TargetDomainA = "TargetDomain";
-        private const string TargetPropertyA = "TargetProperty";
 
         private const string ObjectNameDef = "DefaultObjectName";
 
@@ -40,25 +24,37 @@ namespace Koretech.Kraken.Kaml
             RepositoryFileGenerator repositoryFileGenerator = new(OutputRoot);
             ServiceFileGenerator serviceFileGenerator = new(OutputRoot);
 
+            List<FileGenerator> generators = new List<FileGenerator>()
+            {
+                entityFileGenerator,
+                boFileGenerator,
+                contextFileGenerator,
+                configurationFileGenerator,
+                repositoryFileGenerator,
+                serviceFileGenerator
+            };
+
             // Create the output directories if they don't exist
             OutputRoot.Create();
-            entityFileGenerator.CreateOutputDirectory();
-            configurationFileGenerator.CreateOutputDirectory();            
-            contextFileGenerator.CreateOutputDirectory();
-            boFileGenerator.CreateOutputDirectory();
-            repositoryFileGenerator.CreateOutputDirectory();
-            serviceFileGenerator.CreateOutputDirectory();
+            foreach (FileGenerator generator in generators)
+            {
+                generator.CreateOutputDirectory();
+            }
 
             // Read the .kamlbo document
             XElement kamlRoot = XElement.Load(SourceKamlBo.FullName);
 
-            // Load the KAML BusinessObjects
+            // Load the domain information
+            var domainElement = (from e in kamlRoot.DescendantsAndSelf("DomainObject") select e).First();
+            KamlBoDomain domain = KamlBoDomain.ParseFromXElement(domainElement);
+
+            // Load the business object definitions
             var boElements = from e in kamlRoot.Descendants("BusinessObject") select e;
             List<KamlBoEntity> entities = new();
-            foreach (var bo in boElements)
+            foreach (var boElement in boElements)
             {
-                Console.WriteLine($"Found object {bo.Attribute("Name")?.Value}");
-                KamlBoEntity entity = ParseKamlBoEntity(bo);
+                Console.WriteLine($"Found object {boElement.Attribute("Name")?.Value}");
+                KamlBoEntity entity = KamlBoEntity.ParseFromXElement(boElement, domain);
                 entities.Add(entity);
             }
             Console.WriteLine();
@@ -71,106 +67,22 @@ namespace Koretech.Kraken.Kaml
                 Console.WriteLine($"Found scope function {contextFileGenerator.ScopeFunction}");
             }
 
-            // Determine the domain's root entity
-            KamlBoEntity domainRoot = entities
-                .Where(e => e.IsDomainPrimary)
-                .Single();
-            contextFileGenerator.DomainRoot = domainRoot;
-            entityFileGenerator.DomainRoot = domainRoot;
-            boFileGenerator.DomainRoot = domainRoot;
-            configurationFileGenerator.DomainRoot = domainRoot;
-            repositoryFileGenerator.DomainRoot = domainRoot;
-            serviceFileGenerator.DomainRoot = domainRoot;
+            // Validate the loaded model
+            if (!domain.Validate())
+            {
+                throw new Exception("Model created from KAMLBO specification is not valid.  Sorry, that's all I can tell you right now.");
+            }
 
-            // Create the context file
-            contextFileGenerator.CreateContextFile(entities);
-            Console.WriteLine();
-
-            // Create the repository file
-            repositoryFileGenerator.CreateRepositoryFile(domainRoot);
-            Console.WriteLine();
-
-            // Create the service files
-            serviceFileGenerator.CreateServiceFile(domainRoot);
-// TODO:            serviceFileGenerator.CreateServiceInterfaceFile(domainRoot);
-            Console.WriteLine();
+            // Create subdirectories for each domain where needed
+            entityFileGenerator.CreateDomainSubdirectory(domain);
+            boFileGenerator.CreateDomainSubdirectory(domain);
 
             // Create source files for the entities, business object POCOs and entity configurations
-            entityFileGenerator.CreateDomainSubdirectory();
-            boFileGenerator.CreateDomainSubdirectory();
-            foreach (KamlBoEntity entity in entities)
+            foreach (FileGenerator generator in generators)
             {
-                entityFileGenerator.CreateEntityFile(entity);
-                boFileGenerator.CreateBusinessObjectFile(entity);
-                configurationFileGenerator.CreateConfigurationFile(entity);
+                generator.Generate(domain);
                 Console.WriteLine();
             }
-        }
-
-        private KamlBoEntity ParseKamlBoEntity(XElement boEl)
-        {
-            string name = boEl.Attribute("Name")?.Value ?? "?_?";
-            string tableName = boEl.Element("Data")?.Attribute("Table")?.Value ?? "?_?";
-            var entity = new KamlBoEntity(name, tableName);
-            
-            // Get all the properties
-            var propertiesEl = boEl.Element("Properties");
-            if (propertiesEl != null)
-            {
-                foreach (var propertyEl in propertiesEl.Elements())
-                {
-                    if (string.Equals(propertyEl.Name.LocalName, "BoundProperty"))
-                    {
-                        KamlEntityProperty prop = new()
-                        {
-                            Name = propertyEl.Attribute(NameA)?.Value,
-                            Label = propertyEl.Attribute(LabelA)?.Value,
-                            DataType = propertyEl.Attribute(TypeA)?.Value,
-                            Length = propertyEl.Attribute(LengthA)?.Value.AsInteger() ?? 0,
-                            IsKey = propertyEl.Attribute(IsKeyA)?.Value.AsBoolean() ?? false,
-                            IsRequired = propertyEl.Attribute(IsRequiredA)?.Value.AsBoolean() ?? false,
-                            IsIdentity = propertyEl.Attribute(IsIdentityA)?.Value.AsBoolean() ?? false,
-                            Table = propertyEl.Attribute(TableA)?.Value ?? tableName,
-                            Column = propertyEl.Attribute(ColumnA)?.Value
-                        };
-                        entity.Properties.Add(prop);
-                    }
-                }
-            }
-            
-            // Get all the relationships
-            var relationsEl = boEl.Element("Relations");
-            if (relationsEl != null)
-            {
-                foreach (var relationEl in relationsEl.Elements())
-                {
-                    string relName = relationEl.Attribute(NameA)?.Value ?? "?Name?";
-                    string? targetDomain = relationEl.Attribute(TargetDomainA)?.Value;
-                    string target = relationEl.Attribute(TargetObjectA)?.Value ?? "?TargetObject?";
-                    bool isToMany = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToMany");
-                    bool isToOne = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToOne");
-                    bool isToOwnerMany = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToOwnerMany");
-                    bool isToOwnerOne = string.Equals(relationEl.Attribute(TypeA)?.Value, "ToOwnerOne");
-                    KamlEntityRelation relation = new KamlEntityRelation(relName, target)
-                    {
-                        IsToMany = isToMany,
-                        IsToOne = isToOne,
-                        IsToOwnerMany = isToOwnerMany,
-                        IsToOwnerOne = isToOwnerOne,
-                        TargetDomain = targetDomain
-                    };
-                    var keyMapEls = relationEl.Element("KeyMap");
-                    if (keyMapEls != null)
-                    {
-                        foreach (var keyMapEl in keyMapEls.Elements())
-                        {
-                            relation.KeyMap.Add(keyMapEl.Attribute(SourcePropertyA)?.Value, keyMapEl.Attribute(TargetPropertyA)?.Value);
-                        }
-                    }
-                    entity.Relations.Add(relation);
-                }
-            }
-            return entity;
         }
     }
 }

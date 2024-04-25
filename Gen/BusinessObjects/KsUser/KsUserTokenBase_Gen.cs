@@ -9,16 +9,17 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Infrastructure.Services.KsUser.Entities;
+using Koretech.Domains.KsUsers.Entities;
+using Koretech.Platform.BusinessObjects;
 using System.Collections;
 
-namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
+namespace Koretech.Domains.KsUsers.BusinessObjects
 {
 	/// <summary>
 	/// This business object class wraps the domain entity KsUserTokenEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public abstract class KsUserTokenBase
+	public abstract class KsUserTokenBase : BusinessObject
 	{
 
 		private KsUserTokenEntity _entity;
@@ -36,6 +37,12 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 		{
 			_entity = new();
 		}
+
+		/// <summary>
+		/// Initializes a new instance of the business object class.
+		/// Override when you need to do work in the KsUserToken(entity) constructor.
+		/// </summary>
+		protected virtual void Initialize() { }
 
 		internal KsUserTokenEntity Entity
 		{
@@ -78,7 +85,7 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 
 		#region Relationships
 
-		public virtual KsUser KsUser;
+		public KsUser? KsUser;
 
 		#endregion Relationships
 

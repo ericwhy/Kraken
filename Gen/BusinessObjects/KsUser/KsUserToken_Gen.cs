@@ -9,10 +9,10 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Infrastructure.Services.KsUser.Entities;
+using Koretech.Domains.KsUsers.Entities;
 using System.Collections;
 
-namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
+namespace Koretech.Domains.KsUsers.BusinessObjects
 {
 	/// <summary>
 	/// This business object class wraps the domain entity KsUserTokenEntity and provides access to the entity's data
@@ -36,7 +36,10 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			businessObject.KsUser = KsUser.NewInstance(entity.KsUser);
+			if (entity.KsUser != null)
+			{
+				businessObject.KsUser = BusinessObjects.KsUser.NewInstance(entity.KsUser);
+			}
 
 			return businessObject;
 		}
@@ -60,12 +63,24 @@ namespace Koretech.Infrastructure.Services.KsUser.BusinessObjects
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				newBusinessObject.KsUser = KsUser.NewInstance(entity.KsUser);
+				if (entity.KsUser != null)
+				{
+					newBusinessObject.KsUser =  BusinessObjects.KsUser.NewInstance(entity.KsUser);
+				}
 			}
 
 			return businessObjects;
 		}
 
 		#endregion Static Methods
+
+		/// <summary>
+		/// Create a new instance of this class by wrapping an entity.
+		/// </summary>
+		/// <param name="entity">the entity to wrap</param>
+		protected KsUserToken(KsUserTokenEntity entity) : base(entity)
+		{
+			Initialize();
+		}
 	}
 }

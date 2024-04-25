@@ -1,4 +1,4 @@
-﻿using Koretech.Kraken.Kaml;
+﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
@@ -14,11 +14,23 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// <summary>
         /// Generates an EF entity type configuration class from a KAML BO specification.
         /// </summary>
-        /// <param name="entity">KAML BO specification</param>
-        public void CreateConfigurationFile(KamlBoEntity entity)
+        /// <param name="domain">root of the model of the KAML BO specification, i.e. domain</param>
+        protected override void DoGenerate(KamlBoDomain domain)
         {
-            _ = DomainRoot ?? throw new InvalidOperationException($"DomainRoot must be set before calling {nameof(CreateConfigurationFile)}");
+            foreach (KamlBoEntity entity in domain.Entities)
+            {
+                CreateConfigurationFile(entity);
+            }
+        }
 
+        /// <summary>
+        /// Generates an EF entity type configuration class from a KAML BO specification.
+        /// </summary>
+        /// <param name="entity">model of the KAML BO specification for a BO</param>
+        private void CreateConfigurationFile(KamlBoEntity entity) 
+        { 
+            string domainName = entity.Domain.Name;
+            string domainPackageName = domainName + "s";
             string entityName = entity.Name;
             string tableName = entity.TableName;
             string sourceFileName = Path.Combine(
@@ -29,15 +41,13 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             }
 
             var writer = File.CreateText(sourceFileName);
-            writer.WriteLine("//");
-            writer.WriteLine("// Created by Kraken KAML BO Generator");
-            writer.WriteLine("//");
+            writer.Write(GetFileHeader());
             writer.WriteLine();
-            writer.WriteLine("using Koretech.Kraken.Entities.KsUser;");
+            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.Entities;");
             writer.WriteLine("using Microsoft.EntityFrameworkCore;");
             writer.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
             writer.WriteLine();
-            writer.WriteLine("namespace Koretech.Kraken.Data.Configurations");
+            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}.EntityConfigurations");
             writer.WriteLine("{");
             writer.WriteLine($"\tpublic class {entityName}EntityTypeConfiguration : IEntityTypeConfiguration<{entityName}Entity>");
             writer.WriteLine("\t{");
@@ -108,7 +118,10 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         private void WriteStringColumn(KamlEntityProperty property, StreamWriter writer)
         {
             writer.WriteLine($"\t\t\ttypeBuilder.Property(e => e.{property.Name})");
-            writer.WriteLine($"\t\t\t\t.HasMaxLength({property.Length})");
+            if (property.Length > 0)
+            {
+                writer.WriteLine($"\t\t\t\t.HasMaxLength({property.Length})");
+            }
             writer.WriteLine("\t\t\t\t.IsUnicode(false)");
             writer.WriteLine($"\t\t\t\t.HasColumnName(\"{property.Column}\");");
             writer.WriteLine();
