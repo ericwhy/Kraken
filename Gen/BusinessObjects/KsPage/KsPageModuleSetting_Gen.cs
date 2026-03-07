@@ -9,18 +9,16 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Domains.KsUsers.Entities;
+using Koretech.Domains.KsPages.Entities;
 using System.Collections;
-using Koretech.Domains.KsRoles.BusinessObjects;
 
-
-namespace Koretech.Domains.KsUsers.BusinessObjects
+namespace Koretech.Domains.KsPages.BusinessObjects
 {
 	/// <summary>
-	/// This business object class wraps the domain entity KsUserRoleEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsPageModuleSettingEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public partial class KsUserRole : KsUserRoleBase
+	public partial class KsPageModuleSetting : KsPageModuleSettingBase
 	{
 		#region Static Methods
 
@@ -31,21 +29,16 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// </summary>
 		/// <param name="entity">The entity to create a business object from</param>
 		/// <returns>A newly created business object wrapping the provided entity</returns>
-		public static KsUserRole NewInstance(KsUserRoleEntity entity)
+		public static KsPageModuleSetting NewInstance(KsPageModuleSettingEntity entity)
 		{
-			KsUserRole businessObject = new(entity);
+			KsPageModuleSetting businessObject = new(entity);
 
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
-			if (entity.User != null)
+			if (entity.PageModule != null)
 			{
-				businessObject.User = BusinessObjects.KsUser.NewInstance(entity.User);
-			}
-
-			if (entity.Role != null)
-			{
-				businessObject.Role = KsRoleUser.NewInstance(entity.Role);
+				businessObject.PageModule = BusinessObjects.KsPageModule.NewInstance(entity.PageModule);
 			}
 
 			return businessObject;
@@ -58,26 +51,21 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// </summary>
 		/// <param name="entities">The entities to create business objects from</param>
 		/// <returns>A newly created business object(s) wrapping the provided entities</returns>
-		public static IList<KsUserRole> NewInstance(IList<KsUserRoleEntity> entities)
+		public static IList<KsPageModuleSetting> NewInstance(IList<KsPageModuleSettingEntity> entities)
 		{
-			List<KsUserRole> businessObjects = new();
+			List<KsPageModuleSetting> businessObjects = new();
 
-			foreach (KsUserRoleEntity entity in entities)
+			foreach (KsPageModuleSettingEntity entity in entities)
 			{
-				KsUserRole newBusinessObject = new(entity);
+				KsPageModuleSetting newBusinessObject = new(entity);
 				businessObjects.Add(newBusinessObject);
 
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
 
-				if (entity.User != null)
+				if (entity.PageModule != null)
 				{
-					newBusinessObject.User =  BusinessObjects.KsUser.NewInstance(entity.User);
-				}
-
-				if (entity.Role != null)
-				{
-					newBusinessObject.Role =  KsRoleUser.NewInstance(entity.Role);
+					newBusinessObject.PageModule =  BusinessObjects.KsPageModule.NewInstance(entity.PageModule);
 				}
 			}
 
@@ -90,7 +78,7 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// Create a new instance of this class by wrapping an entity.
 		/// </summary>
 		/// <param name="entity">the entity to wrap</param>
-		protected KsUserRole(KsUserRoleEntity entity) : base(entity)
+		protected KsPageModuleSetting(KsPageModuleSettingEntity entity) : base(entity)
 		{
 			Initialize();
 		}

@@ -124,10 +124,10 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                     WriteToOneRelationProperty(rel, writer);
                 }
 
-                // Not supporting inter-domain relationships at this time
+                // TODO: What else do we need to generate for inter-domain relationships?
                 if (!string.IsNullOrEmpty(rel.TargetDomain))
                 {
-                    writer.WriteLine("\t\t// This is an inter-domain relationship. Not fully implemented yet.");
+                    writer.WriteLine("\t\t// This is an inter-domain relationship.");
                 }
                 writer.WriteLine();
             }

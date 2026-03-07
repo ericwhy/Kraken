@@ -16,64 +16,64 @@ using System.Collections;
 namespace Koretech.Domains.KsPages.BusinessObjects
 {
 	/// <summary>
-	/// This business object class wraps the domain entity KsPageObjectEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsPageModuleSettingEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public abstract class KsPageObjectBase : BusinessObject
+	public abstract class KsPageModuleSettingBase : BusinessObject
 	{
 
-		private KsPageObjectEntity _entity;
+		private KsPageModuleSettingEntity _entity;
 
 		/// <summary>
 		/// Constructor.  Protected to force use of the static factory method NewInstance().
 		/// </summary>
 		/// <param name="entity">An entity that provides data for the business object</param>
-		protected KsPageObjectBase(KsPageObjectEntity entity)
+		protected KsPageModuleSettingBase(KsPageModuleSettingEntity entity)
 		{
 			_entity = entity;
 		}
 
-		public KsPageObjectBase()
+		public KsPageModuleSettingBase()
 		{
 			_entity = new();
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the business object class.
-		/// Override when you need to do work in the KsPageObject(entity) constructor.
+		/// Override when you need to do work in the KsPageModuleSetting(entity) constructor.
 		/// </summary>
 		protected virtual void Initialize() { }
 
-		internal KsPageObjectEntity Entity
+		internal KsPageModuleSettingEntity Entity
 		{
 			get => _entity;
 		}
 
 		#region Entity Properties
 
-		public virtual string? PageName
+		public virtual int? PageModuleNo
 		{
-			get => _entity.PageName;
-			set => _entity.PageName = value;
+			get => _entity.PageModuleNo;
+			set => _entity.PageModuleNo = value;
 		}
 
-		public virtual string? ObjectId
+		public virtual string? Name
 		{
-			get => _entity.ObjectId;
-			set => _entity.ObjectId = value;
+			get => _entity.Name;
+			set => _entity.Name = value;
 		}
 
-		public virtual char? PrimaryFlg
+		public virtual string? Value
 		{
-			get => _entity.PrimaryFlg;
-			set => _entity.PrimaryFlg = value;
+			get => _entity.Value;
+			set => _entity.Value = value;
 		}
 
 		#endregion Entity Properties
 
 		#region Relationships
 
-		public KsPage? KsPages;
+		public KsPageModule? PageModule;
 
 		#endregion Relationships
 

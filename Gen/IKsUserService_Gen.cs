@@ -16,14 +16,14 @@ namespace Koretech.Domains.KsUsers
 {
 	public partial interface IKsUserService
 	{
-		public Task<IEnumerable<BusinessObjects.KsUser>> GetAllAsync();
+		public Task<IEnumerable<KsUser>> GetAllAsync();
 
-		public Task<BusinessObjects.KsUser?> GetByPrimaryKeyAsync(string KsUserId);
+		public Task<KsUser?> GetByPrimaryKeyAsync(string KsUserId);
 
-		public void Insert(BusinessObjects.KsUser businessObject);
+		public void Insert(KsUser businessObject);
 
-		public void Update(BusinessObjects.KsUser businessObject);
+		public void Update(KsUser businessObject);
 
-		public void Delete(BusinessObjects.KsUser businessObject);
+		public void Delete(KsUser businessObject);
 	}
 }

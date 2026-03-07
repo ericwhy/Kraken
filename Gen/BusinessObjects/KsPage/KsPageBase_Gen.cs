@@ -139,6 +139,14 @@ namespace Koretech.Domains.KsPages.BusinessObjects
 
 		#region Relationships
 
+		public List<KsPageContent> KsPageContents = new();
+
+		public List<KsPageObject> KsPageObjects = new();
+
+		public List<KsPageParameter> KsPageParameters = new();
+
+		public List<KsPageSecurity> KsPageSecuritys = new();
+
 		#endregion Relationships
 
 	}

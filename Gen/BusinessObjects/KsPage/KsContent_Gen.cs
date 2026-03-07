@@ -9,18 +9,16 @@
 /*                                                      */
 /********************************************************/
 
-using Koretech.Domains.KsUsers.Entities;
+using Koretech.Domains.KsPages.Entities;
 using System.Collections;
-using Koretech.Domains.KsRoles.BusinessObjects;
 
-
-namespace Koretech.Domains.KsUsers.BusinessObjects
+namespace Koretech.Domains.KsPages.BusinessObjects
 {
 	/// <summary>
-	/// This business object class wraps the domain entity KsUserRoleEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsContentEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public partial class KsUserRole : KsUserRoleBase
+	public partial class KsContent : KsContentBase
 	{
 		#region Static Methods
 
@@ -31,22 +29,12 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// </summary>
 		/// <param name="entity">The entity to create a business object from</param>
 		/// <returns>A newly created business object wrapping the provided entity</returns>
-		public static KsUserRole NewInstance(KsUserRoleEntity entity)
+		public static KsContent NewInstance(KsContentEntity entity)
 		{
-			KsUserRole businessObject = new(entity);
+			KsContent businessObject = new(entity);
 
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
-
-			if (entity.User != null)
-			{
-				businessObject.User = BusinessObjects.KsUser.NewInstance(entity.User);
-			}
-
-			if (entity.Role != null)
-			{
-				businessObject.Role = KsRoleUser.NewInstance(entity.Role);
-			}
 
 			return businessObject;
 		}
@@ -58,27 +46,17 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// </summary>
 		/// <param name="entities">The entities to create business objects from</param>
 		/// <returns>A newly created business object(s) wrapping the provided entities</returns>
-		public static IList<KsUserRole> NewInstance(IList<KsUserRoleEntity> entities)
+		public static IList<KsContent> NewInstance(IList<KsContentEntity> entities)
 		{
-			List<KsUserRole> businessObjects = new();
+			List<KsContent> businessObjects = new();
 
-			foreach (KsUserRoleEntity entity in entities)
+			foreach (KsContentEntity entity in entities)
 			{
-				KsUserRole newBusinessObject = new(entity);
+				KsContent newBusinessObject = new(entity);
 				businessObjects.Add(newBusinessObject);
 
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
-
-				if (entity.User != null)
-				{
-					newBusinessObject.User =  BusinessObjects.KsUser.NewInstance(entity.User);
-				}
-
-				if (entity.Role != null)
-				{
-					newBusinessObject.Role =  KsRoleUser.NewInstance(entity.Role);
-				}
 			}
 
 			return businessObjects;
@@ -90,7 +68,7 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 		/// Create a new instance of this class by wrapping an entity.
 		/// </summary>
 		/// <param name="entity">the entity to wrap</param>
-		protected KsUserRole(KsUserRoleEntity entity) : base(entity)
+		protected KsContent(KsContentEntity entity) : base(entity)
 		{
 			Initialize();
 		}

@@ -43,5 +43,13 @@ namespace Koretech.Domains.KsPages.Entities
 
 		public string? RedirectPageName { get; set; }
 
+		public IList<KsPageContentEntity> KsPageContents { get; set; } = new List<KsPageContentEntity>();  // Navigation property to child KsPageContentEntity
+
+		public IList<KsPageObjectEntity> KsPageObjects { get; set; } = new List<KsPageObjectEntity>();  // Navigation property to child KsPageObjectEntity
+
+		public IList<KsPageParameterEntity> KsPageParameters { get; set; } = new List<KsPageParameterEntity>();  // Navigation property to child KsPageParameterEntity
+
+		public IList<KsPageSecurityEntity> KsPageSecuritys { get; set; } = new List<KsPageSecurityEntity>();  // Navigation property to child KsPageSecurityEntity
+
 	}
 }

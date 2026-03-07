@@ -51,7 +51,7 @@ namespace Koretech.Domains.KsRoles.BusinessObjects
 
 		#region Entity Properties
 
-		public virtual int? RoleNo
+		public virtual int RoleNo
 		{
 			get => _entity.RoleNo;
 			set => _entity.RoleNo = value;
@@ -69,7 +69,7 @@ namespace Koretech.Domains.KsRoles.BusinessObjects
 			set => _entity.IfAttrName = value;
 		}
 
-		public virtual string? IfOperator
+		public virtual string IfOperator
 		{
 			get => _entity.IfOperator;
 			set => _entity.IfOperator = value;

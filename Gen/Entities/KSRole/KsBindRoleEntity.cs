@@ -15,13 +15,13 @@ namespace Koretech.Domains.KsRoles.Entities
 	public class KsBindRoleEntity
 	{
 	
-		public int? RoleNo { get; set; }
+		public int RoleNo { get; set; }
 
 		public string? IfColumnName { get; set; }
 
 		public string? IfAttrName { get; set; }
 
-		public string? IfOperator { get; set; }
+		public string IfOperator { get; set; } = string.Empty;
 
 		public string? IfValue { get; set; }
 

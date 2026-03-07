@@ -36,6 +36,11 @@ namespace Koretech.Domains.KsPages.BusinessObjects
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
+			if (entity.KsPages != null)
+			{
+				businessObject.KsPages = BusinessObjects.KsPage.NewInstance(entity.KsPages);
+			}
+
 			return businessObject;
 		}
 
@@ -57,6 +62,11 @@ namespace Koretech.Domains.KsPages.BusinessObjects
 
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
+
+				if (entity.KsPages != null)
+				{
+					newBusinessObject.KsPages =  BusinessObjects.KsPage.NewInstance(entity.KsPages);
+				}
 			}
 
 			return businessObjects;

@@ -21,6 +21,12 @@ namespace Koretech.Kraken.KamlBoGen.KamlBoModel
         public bool IsToOwnerOne { get; set; }
 
         public bool IsCrossDomain => !string.IsNullOrEmpty(TargetDomain);
+        public string TypeName =>
+            IsToMany ? "to many" :
+            IsToOne ? "to one" :
+            IsToOwnerMany ? "to many (owner)" :
+            IsToOwnerOne ? "to one (owner)" :
+            "UNKNOWN TYPE";
 
         /// <summary>
         /// Indicates whether this is a relationship from an owned type to its owning type.

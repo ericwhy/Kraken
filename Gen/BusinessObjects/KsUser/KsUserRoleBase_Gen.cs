@@ -81,7 +81,7 @@ namespace Koretech.Domains.KsUsers.BusinessObjects
 
 		#region Relationships
 
-		public List<KsUser> User = new();
+		public KsUser? User;
 
 		public KsRoleUser? Role;
 

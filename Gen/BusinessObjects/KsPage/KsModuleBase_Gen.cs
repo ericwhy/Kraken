@@ -16,64 +16,56 @@ using System.Collections;
 namespace Koretech.Domains.KsPages.BusinessObjects
 {
 	/// <summary>
-	/// This business object class wraps the domain entity KsPageObjectEntity and provides access to the entity's data
+	/// This business object class wraps the domain entity KsModuleEntity and provides access to the entity's data
 	/// through accessor properties.  It also provides a place for business logic related to the domain entity.
 	/// </summary>
-	public abstract class KsPageObjectBase : BusinessObject
+	public abstract class KsModuleBase : BusinessObject
 	{
 
-		private KsPageObjectEntity _entity;
+		private KsModuleEntity _entity;
 
 		/// <summary>
 		/// Constructor.  Protected to force use of the static factory method NewInstance().
 		/// </summary>
 		/// <param name="entity">An entity that provides data for the business object</param>
-		protected KsPageObjectBase(KsPageObjectEntity entity)
+		protected KsModuleBase(KsModuleEntity entity)
 		{
 			_entity = entity;
 		}
 
-		public KsPageObjectBase()
+		public KsModuleBase()
 		{
 			_entity = new();
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the business object class.
-		/// Override when you need to do work in the KsPageObject(entity) constructor.
+		/// Override when you need to do work in the KsModule(entity) constructor.
 		/// </summary>
 		protected virtual void Initialize() { }
 
-		internal KsPageObjectEntity Entity
+		internal KsModuleEntity Entity
 		{
 			get => _entity;
 		}
 
 		#region Entity Properties
 
-		public virtual string? PageName
+		public virtual int? ModuleNo
 		{
-			get => _entity.PageName;
-			set => _entity.PageName = value;
+			get => _entity.ModuleNo;
+			set => _entity.ModuleNo = value;
 		}
 
-		public virtual string? ObjectId
+		public virtual string? Title
 		{
-			get => _entity.ObjectId;
-			set => _entity.ObjectId = value;
-		}
-
-		public virtual char? PrimaryFlg
-		{
-			get => _entity.PrimaryFlg;
-			set => _entity.PrimaryFlg = value;
+			get => _entity.Title;
+			set => _entity.Title = value;
 		}
 
 		#endregion Entity Properties
 
 		#region Relationships
-
-		public KsPage? KsPages;
 
 		#endregion Relationships
 

@@ -12,16 +12,26 @@
 
 namespace Koretech.Domains.KsPages.Entities
 {
-	public class KsPageObjectEntity
+	public class KsPageModuleEntity
 	{
 	
+		public int? PageModuleNo { get; set; }
+
 		public string? PageName { get; set; }
 
-		public string? ObjectId { get; set; }
+		public int? ModuleNo { get; set; }
 
-		public char? PrimaryFlg { get; set; }
+		public string? Title { get; set; }
 
-		public KsPageEntity? KsPages { get; set; } = null;  // Navigation property to owner KsPageEntity
+		public string? ZoneName { get; set; }
+
+		public int? Sequence { get; set; }
+
+		public string? CssClass { get; set; }
+
+		public KsPageEntity? Page { get; set; } = null;  // Navigation property to owner KsPageEntity
+
+		public KsModuleEntity? Module { get; set; } = null;  // Navigation property to child KsModuleEntity
 
 	}
 }

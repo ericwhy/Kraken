@@ -114,10 +114,10 @@ namespace Koretech.Kraken.KamlBoGen.KamlBoModel
                         IsToOwnerOne = isToOwnerOne,
                         TargetDomain = targetDomain
                     };
-                    var keyMapEls = relationEl.Element("KeyMap");
-                    if (keyMapEls != null)
+                    var keyMapEls = relationEl.Elements("KeyMap");
+                    if (keyMapEls != null && keyMapEls.Count() > 0)
                     {
-                        foreach (var keyMapEl in keyMapEls.Elements())
+                        foreach (var keyMapEl in keyMapEls)
                         {
                             string? sourceProperty = keyMapEl.Attribute(SourcePropertyA)?.Value;
                             if (sourceProperty != null)
@@ -125,6 +125,10 @@ namespace Koretech.Kraken.KamlBoGen.KamlBoModel
                                 relation.KeyMap.Add(sourceProperty, keyMapEl.Attribute(TargetPropertyA)?.Value);
                             }
                         }
+                    }
+                    else
+                    {
+                        throw new Exception($"No key mapping found for relation {relName} on entity {entity.Name}");
                     }
                     entity.Relations.Add(relation);
                 }

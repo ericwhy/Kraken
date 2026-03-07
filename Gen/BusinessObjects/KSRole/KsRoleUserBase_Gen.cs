@@ -55,25 +55,25 @@ namespace Koretech.Domains.KsRoles.BusinessObjects
 
 		#region Entity Properties
 
-		public virtual int? RoleNo
+		public virtual int RoleNo
 		{
 			get => _entity.RoleNo;
 			set => _entity.RoleNo = value;
 		}
 
-		public virtual string? RoleDesc
+		public virtual string RoleDesc
 		{
 			get => _entity.RoleDesc;
 			set => _entity.RoleDesc = value;
 		}
 
-		public virtual char? WebAssignFlg
+		public virtual char WebAssignFlg
 		{
 			get => _entity.WebAssignFlg;
 			set => _entity.WebAssignFlg = value;
 		}
 
-		public virtual char? ImplicitAssignFlg
+		public virtual char ImplicitAssignFlg
 		{
 			get => _entity.ImplicitAssignFlg;
 			set => _entity.ImplicitAssignFlg = value;

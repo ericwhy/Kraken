@@ -21,5 +21,7 @@ namespace Koretech.Domains.KsPages.Entities
 
 		public string? ControlId { get; set; }
 
+		public KsPageEntity? KsPage { get; set; } = null;  // Navigation property to owner KsPageEntity
+
 	}
 }

@@ -21,5 +21,7 @@ namespace Koretech.Domains.KsPages.Entities
 
 		public char? DenyAccessOverrideFlg { get; set; }
 
+		public KsPageEntity? KsPage { get; set; } = null;  // Navigation property to owner KsPageEntity
+
 	}
 }

@@ -19,13 +19,13 @@ namespace Koretech.Domains.KsRoles.Entities
 	public class KsRoleUserEntity
 	{
 	
-		public int? RoleNo { get; set; }
+		public int RoleNo { get; set; }
 
-		public string? RoleDesc { get; set; }
+		public string RoleDesc { get; set; } = string.Empty;
 
-		public char? WebAssignFlg { get; set; }
+		public char WebAssignFlg { get; set; }
 
-		public char? ImplicitAssignFlg { get; set; }
+		public char ImplicitAssignFlg { get; set; }
 
 		public string? HomePage { get; set; }
 

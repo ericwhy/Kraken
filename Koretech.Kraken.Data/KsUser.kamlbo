@@ -15,7 +15,7 @@
 					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
 				</Relation>
 				<Relation Name="UserToken" TargetObject="KsUserToken" Type="ToOne">
-					<ObjectKeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
 				</Relation>
 			</Relations>
 			<Properties>
@@ -45,7 +45,7 @@
 			</Data>
 			<Relations>
 				<Relation Name="User" TargetObject="KsUser" Type="ToOwnerMany">
-					<ObjectKeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
+					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
 				</Relation>
 			</Relations>
 			<Properties>
@@ -57,7 +57,7 @@
 			<Data Table="ks_user_role">
 			</Data>
 			<Relations>
-				<Relation Name="User" TargetObject="KsUser" Type="ToOwnerMany">
+				<Relation Name="User" TargetObject="KsUser" Type="ToOwnerOne">
 					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
 				</Relation>
 				<Relation Name="Role" TargetDomain="KsRole" TargetObject="KsRoleUser" Type="ToOne">
@@ -91,7 +91,7 @@
 			</Data>
 			<Relations>
 				<Relation Name="KsUser" TargetObject="KsUser" Type="ToOwnerOne">
-					<KeyMap Property="KsUserId" ReferenceProperty="KsUserId" />
+					<KeyMap SourceProperty="KsUserId" TargetProperty="KsUserId" />
 				</Relation>
 			</Relations>
 			<Properties>
@@ -112,4 +112,4 @@
 		<Scope>COMPANY</Scope>
 		<Scope>OWNER</Scope>
 	</Scopes>
-</DomainObject>
+</Domain>

@@ -73,6 +73,8 @@ namespace Koretech.Domains.KsPages.BusinessObjects
 
 		#region Relationships
 
+		public KsPage? KsPage;
+
 		#endregion Relationships
 
 	}

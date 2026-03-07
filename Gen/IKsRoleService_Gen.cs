@@ -16,14 +16,14 @@ namespace Koretech.Domains.KsRoles
 {
 	public partial interface IKsRoleService
 	{
-		public Task<IEnumerable<BusinessObjects.KsRole>> GetAllAsync();
+		public Task<IEnumerable<KsRole>> GetAllAsync();
 
-		public Task<BusinessObjects.KsRoleUser?> GetByPrimaryKeyAsync(int RoleNo);
+		public Task<KsRoleUser?> GetByPrimaryKeyAsync(int RoleNo);
 
-		public void Insert(BusinessObjects.KsRoleUser businessObject);
+		public void Insert(KsRoleUser businessObject);
 
-		public void Update(BusinessObjects.KsRoleUser businessObject);
+		public void Update(KsRoleUser businessObject);
 
-		public void Delete(BusinessObjects.KsRoleUser businessObject);
+		public void Delete(KsRoleUser businessObject);
 	}
 }

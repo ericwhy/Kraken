@@ -36,6 +36,30 @@ namespace Koretech.Domains.KsPages.BusinessObjects
 			// Recursively create business objects from the entities that have relationships with this one
 			// and link to them through the relationship properties in this class.
 
+			if (entity.KsPageContents != null)
+			{
+				IList<KsPageContent> newKsPageContent = BusinessObjects.KsPageContent.NewInstance(entity.KsPageContents);
+				businessObject.KsPageContents.AddRange(newKsPageContent);
+			}
+
+			if (entity.KsPageObjects != null)
+			{
+				IList<KsPageObject> newKsPageObject = BusinessObjects.KsPageObject.NewInstance(entity.KsPageObjects);
+				businessObject.KsPageObjects.AddRange(newKsPageObject);
+			}
+
+			if (entity.KsPageParameters != null)
+			{
+				IList<KsPageParameter> newKsPageParameter = BusinessObjects.KsPageParameter.NewInstance(entity.KsPageParameters);
+				businessObject.KsPageParameters.AddRange(newKsPageParameter);
+			}
+
+			if (entity.KsPageSecuritys != null)
+			{
+				IList<KsPageSecurity> newKsPageSecurity = BusinessObjects.KsPageSecurity.NewInstance(entity.KsPageSecuritys);
+				businessObject.KsPageSecuritys.AddRange(newKsPageSecurity);
+			}
+
 			return businessObject;
 		}
 
@@ -57,6 +81,30 @@ namespace Koretech.Domains.KsPages.BusinessObjects
 
 				// Recursively create business objects from the entities that have relationships with this one
 				// and link to them through the relationship properties in this class.
+
+				if (entity.KsPageContents != null)
+				{
+					IList<KsPageContent> newKsPageContent = BusinessObjects.KsPageContent.NewInstance(entity.KsPageContents);
+					newBusinessObject.KsPageContents.AddRange(newKsPageContent);
+				}
+
+				if (entity.KsPageObjects != null)
+				{
+					IList<KsPageObject> newKsPageObject = BusinessObjects.KsPageObject.NewInstance(entity.KsPageObjects);
+					newBusinessObject.KsPageObjects.AddRange(newKsPageObject);
+				}
+
+				if (entity.KsPageParameters != null)
+				{
+					IList<KsPageParameter> newKsPageParameter = BusinessObjects.KsPageParameter.NewInstance(entity.KsPageParameters);
+					newBusinessObject.KsPageParameters.AddRange(newKsPageParameter);
+				}
+
+				if (entity.KsPageSecuritys != null)
+				{
+					IList<KsPageSecurity> newKsPageSecurity = BusinessObjects.KsPageSecurity.NewInstance(entity.KsPageSecuritys);
+					newBusinessObject.KsPageSecuritys.AddRange(newKsPageSecurity);
+				}
 			}
 
 			return businessObjects;

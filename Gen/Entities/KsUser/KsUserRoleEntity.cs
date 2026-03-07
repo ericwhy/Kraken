@@ -25,10 +25,10 @@ namespace Koretech.Domains.KsUsers.Entities
 
 		public int RoleNo { get; set; }
 
-		public IList<KsUserEntity> User { get; set; } = new List<KsUserEntity>();  // Navigation property to owner KsUserEntity
+		public KsUserEntity? User { get; set; } = null;  // Navigation property to owner KsUserEntity
 
 		public KsRoleUserEntity? Role { get; set; } = null;  // Navigation property to child KsRoleUserEntity
-		// This is an inter-domain relationship. Not fully implemented yet.
+		// This is an inter-domain relationship.
 
 	}
 }

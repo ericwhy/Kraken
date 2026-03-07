@@ -1,4 +1,5 @@
 ﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
+using System.Reflection.Emit;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
@@ -58,28 +59,66 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
 
             if (ScopeFunction != null)
             {
-                writer.WriteLine("\t\t#region Scope Functions");
-                writer.WriteLine();
+                writer.WriteLine("\t\t// Scope Function");
                 writer.WriteLine($"\t\tpublic IQueryable<{primaryEntityName}Entity> {domainName}EntityScope(string userId, string objectId, string methodName, int? scopeOverride)");
                 writer.WriteLine($"\t\t\t=> FromExpression(() => {domainName}EntityScope(userId, objectId, methodName, scopeOverride));");
-                writer.WriteLine();
-                writer.WriteLine("\t\t#endregion Scope Functions");
                 writer.WriteLine();
             }
 
             writer.WriteLine("\t\tprotected override void OnModelCreating(ModelBuilder modelBuilder)");
             writer.WriteLine("\t\t{");
-            writer.WriteLine($"\t\t\tnew {primaryEntityName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{primaryEntityName}Entity>());");
-            foreach (string ownedEntityName in ownedEntityNames)
-            {
-                writer.WriteLine($"\t\t\tnew {ownedEntityName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{ownedEntityName}Entity>());");
-            }
+            writer.WriteLine("\t\t\t// Configure entity types");
+            writer.WriteLine($"\t\t\tmodelBuilder.ApplyConfigurationsFromAssembly(typeof({primaryEntityName}Entity).Assembly);");
+            //writer.WriteLine($"\t\t\tnew {primaryEntityName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{primaryEntityName}Entity>());");
+            //foreach (string ownedEntityName in ownedEntityNames)
+            //{
+            //    writer.WriteLine($"\t\t\tnew {ownedEntityName}EntityTypeConfiguration().Configure(modelBuilder.Entity<{ownedEntityName}Entity>());");
+            //}
             writer.WriteLine();
             writer.WriteLine("\t\t\tmodelBuilder.HasDefaultSchema(\"ks\");");
             writer.WriteLine($"\t\t\tmodelBuilder.HasDbFunction(typeof({domainName}Context).GetMethod(nameof({domainName}EntityScope))!)");
             writer.WriteLine($"\t\t\t\t.HasName(\"{ScopeFunction}\");");
-            writer.WriteLine("\t\t}");
 
+            foreach (KamlBoEntity entity in domain.Entities)
+            {
+                foreach (KamlEntityRelation relation in entity.Relations)
+                {
+                    string? targetDomainName = relation.IsCrossDomain ? relation.TargetDomain : "this";
+
+                    writer.WriteLine();
+                    writer.WriteLine($"\t\t\t// Relation '{relation.Name}' from {entity.Name} to {relation.TargetEntity} in {targetDomainName} domain");
+                    writer.WriteLine($"\t\t\t// Cardinality: {relation.TypeName}");
+
+                    string hasMethodName = (relation.IsToOne || relation.IsToOwnerOne) ? "HasOne" : "HasMany";
+                    string withMethodName = (relation.IsToOne || relation.IsToOwnerOne) ? "WithMany" : "WithOne";
+
+                    writer.WriteLine($"\t\t\tmodelBuilder.Entity<{entity.Name}Entity>()");
+                    writer.WriteLine($"\t\t\t\t.{hasMethodName}(entity => entity.{relation.Name})");
+                    writer.WriteLine($"\t\t\t\t.{withMethodName}()");
+                    if (relation.KeyMap.Count == 1)
+                    { 
+                        writer.WriteLine($"\t\t\t\t.HasForeignKey(target => target.{relation.KeyMap.Values.First()});");
+                    }
+                    else if (relation.KeyMap.Count == 0)
+                    {
+                        throw new Exception($"Cannot generate relationship because no key mapping was found for relation {relation.Name} on entity {entity.Name}");
+                    }
+                    else
+                    {
+                        string keyList = string.Empty;
+                        bool firstTime = true;
+                        foreach (string key in relation.KeyMap.Values)
+                        {
+                            keyList = $"{keyList}{(firstTime ? string.Empty : ", ")}target.{key}";
+                            writer.WriteLine($"\t\t\t\t.HasForeignKey(target => new {{ {keyList} }});");
+                            firstTime = false;
+                        }
+
+                    }
+                }
+            }
+
+            writer.WriteLine("\t\t}");
             writer.WriteLine("\t}");
             writer.WriteLine("}");
 

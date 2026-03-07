@@ -27,24 +27,81 @@ namespace Koretech.Domains.KsUsers.Repositories
 		public virtual DbSet<PasswordHistoryEntity> PasswordHistorys { get; set; }
 		public virtual DbSet<KsUserTokenEntity> KsUserTokens { get; set; }
 
-		#region Scope Functions
-
+		// Scope Function
 		public IQueryable<KsUserEntity> KsUserEntityScope(string userId, string objectId, string methodName, int? scopeOverride)
 			=> FromExpression(() => KsUserEntityScope(userId, objectId, methodName, scopeOverride));
 
-		#endregion Scope Functions
-
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			new KsUserEntityTypeConfiguration().Configure(modelBuilder.Entity<KsUserEntity>());
-			new KsUserLoginFailureEntityTypeConfiguration().Configure(modelBuilder.Entity<KsUserLoginFailureEntity>());
-			new KsUserRoleEntityTypeConfiguration().Configure(modelBuilder.Entity<KsUserRoleEntity>());
-			new PasswordHistoryEntityTypeConfiguration().Configure(modelBuilder.Entity<PasswordHistoryEntity>());
-			new KsUserTokenEntityTypeConfiguration().Configure(modelBuilder.Entity<KsUserTokenEntity>());
+			// Configure entity types
+			modelBuilder.ApplyConfigurationsFromAssembly(typeof(KsUserEntity).Assembly);
 
 			modelBuilder.HasDefaultSchema("ks");
 			modelBuilder.HasDbFunction(typeof(KsUserContext).GetMethod(nameof(KsUserEntityScope))!)
 				.HasName("kssf_scope_ksuser");
+
+			// Relation 'LoginFailures' from KsUser to KsUserLoginFailure in this domain
+			// Cardinality: to many
+			modelBuilder.Entity<KsUserEntity>()
+				.HasMany(entity => entity.LoginFailures)
+				.WithOne()
+				.HasForeignKey(target => target.KsUserId);
+
+			// Relation 'PasswordHistory' from KsUser to PasswordHistory in this domain
+			// Cardinality: to many
+			modelBuilder.Entity<KsUserEntity>()
+				.HasMany(entity => entity.PasswordHistory)
+				.WithOne()
+				.HasForeignKey(target => target.KsUserId);
+
+			// Relation 'UserRoles' from KsUser to KsUserRole in this domain
+			// Cardinality: to many
+			modelBuilder.Entity<KsUserEntity>()
+				.HasMany(entity => entity.UserRoles)
+				.WithOne()
+				.HasForeignKey(target => target.KsUserId);
+
+			// Relation 'UserToken' from KsUser to KsUserToken in this domain
+			// Cardinality: to one
+			modelBuilder.Entity<KsUserEntity>()
+				.HasOne(entity => entity.UserToken)
+				.WithMany()
+				.HasForeignKey(target => target.KsUserId);
+
+			// Relation 'User' from KsUserLoginFailure to KsUser in this domain
+			// Cardinality: to many (owner)
+			modelBuilder.Entity<KsUserLoginFailureEntity>()
+				.HasMany(entity => entity.User)
+				.WithOne()
+				.HasForeignKey(target => target.KsUserId);
+
+			// Relation 'User' from KsUserRole to KsUser in this domain
+			// Cardinality: to one (owner)
+			modelBuilder.Entity<KsUserRoleEntity>()
+				.HasOne(entity => entity.User)
+				.WithMany()
+				.HasForeignKey(target => target.KsUserId);
+
+			// Relation 'Role' from KsUserRole to KsRoleUser in KsRole domain
+			// Cardinality: to one
+			modelBuilder.Entity<KsUserRoleEntity>()
+				.HasOne(entity => entity.Role)
+				.WithMany()
+				.HasForeignKey(target => target.RoleNo);
+
+			// Relation 'KsUser' from PasswordHistory to KsUser in this domain
+			// Cardinality: to many (owner)
+			modelBuilder.Entity<PasswordHistoryEntity>()
+				.HasMany(entity => entity.KsUser)
+				.WithOne()
+				.HasForeignKey(target => target.KsUserId);
+
+			// Relation 'KsUser' from KsUserToken to KsUser in this domain
+			// Cardinality: to one (owner)
+			modelBuilder.Entity<KsUserTokenEntity>()
+				.HasOne(entity => entity.KsUser)
+				.WithMany()
+				.HasForeignKey(target => target.KsUserId);
 		}
 	}
 }

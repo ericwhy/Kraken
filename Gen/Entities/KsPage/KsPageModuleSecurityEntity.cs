@@ -9,19 +9,24 @@
 /*                                                      */
 /********************************************************/
 
+using Koretech.Domains.KsRoles.Entities;
+
 
 namespace Koretech.Domains.KsPages.Entities
 {
-	public class KsPageObjectEntity
+	public class KsPageModuleSecurityEntity
 	{
 	
-		public string? PageName { get; set; }
+		public int? PageModuleNo { get; set; }
 
-		public string? ObjectId { get; set; }
+		public int? RoleNo { get; set; }
 
-		public char? PrimaryFlg { get; set; }
+		public char? DenyAccessOverrideFlg { get; set; }
 
-		public KsPageEntity? KsPages { get; set; } = null;  // Navigation property to owner KsPageEntity
+		public KsPageModuleEntity? PageModule { get; set; } = null;  // Navigation property to owner KsPageModuleEntity
+
+		public KsRoleUserEntity? Role { get; set; } = null;  // Navigation property to child KsRoleUserEntity
+		// This is an inter-domain relationship.
 
 	}
 }
