@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33213.308
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11512.155 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data", "Koretech.Kraken.Data\Koretech.Kraken.Data.csproj", "{F472867C-B7F9-43DA-8061-39EB01979FEA}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Test", "Koretech.Kraken.Data.Test\Koretech.Kraken.Data.Test.csproj", "{004280AE-9892-4501-A451-9793D0F39BCD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Test.Console", "Koretech.Kraken.Data.Test.Console\Koretech.Kraken.Data.Test.Console.csproj", "{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koretech.Kraken.KamlBoGen.Test", "Koretech.Kraken.KamlBoGen.Test\Koretech.Kraken.KamlBoGen.Test.csproj", "{F08E4730-0E69-4C87-87EA-956D1722E4DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F08E4730-0E69-4C87-87EA-956D1722E4DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F08E4730-0E69-4C87-87EA-956D1722E4DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F08E4730-0E69-4C87-87EA-956D1722E4DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F08E4730-0E69-4C87-87EA-956D1722E4DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

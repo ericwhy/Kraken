@@ -11,4 +11,13 @@
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="docs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include=".github\assistant-guidelines.md" />
+    <None Include=".github\project-overview.md" />
+  </ItemGroup>
+
 </Project>
