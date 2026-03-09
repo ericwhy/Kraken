@@ -1,5 +1,5 @@
-﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
 using System.Text;
+using SharedModel = Koretech.Kraken.KamlBoModel.Model;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
@@ -16,7 +16,6 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// <summary>
         /// Creates the subdirectory for storing BO files if it doesn't already exist.
         /// </summary>
-        /// <param name="path"></param>
         public virtual void CreateOutputDirectory()
         {
             if (!string.IsNullOrEmpty(generatePath))
@@ -28,7 +27,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// <summary>
         /// Here is where we generate the output file.
         /// </summary>
-        public void Generate(KamlBoDomain domain)
+        public void Generate(SharedModel.KamlBoDomain domain)
         {
             DoGenerate(domain);
         }
@@ -36,15 +35,14 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// <summary>
         /// A place for concrete implementation for generating the output file.
         /// </summary>
-        protected abstract void DoGenerate(KamlBoDomain domain);
+        protected abstract void DoGenerate(SharedModel.KamlBoDomain domain);
 
         /// <summary>
         /// Generates the header lines that appear at the top of every generated code file.
         /// </summary>
-        /// <returns>the header as a string</returns>
         protected string GetFileHeader()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             sb.AppendLine("/********************************************************/");
             sb.AppendLine("/*                                                      */");
@@ -63,13 +61,10 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         /// <summary>
         /// Gets a string containing a method signature for passing the primary key(s) of the given entity.
         /// </summary>
-        /// <param name="entity">Representation of the entity from KAMLBO</param>
-        /// <param name="includeTypes">If true, each parameter name will be preceded by its data type.</param>
-        /// <returns>a comma-delimited string of parameters</returns>
-        protected string GetPrimaryKeyAsParameters(KamlBoEntity entity, bool includeTypes)
+        protected string GetPrimaryKeyAsParameters(SharedModel.KamlBoEntity entity, bool includeTypes)
         {
             string result = string.Empty;
-            foreach (KamlEntityProperty property in entity.Properties)
+            foreach (SharedModel.KamlBoEntityProperty property in entity.Properties)
             {
                 if (property.IsKey)
                 {
@@ -78,14 +73,17 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                     {
                         result += ", ";
                     }
-                    if (includeTypes) 
+                    if (includeTypes)
                     {
                         result += $"{clrType} ";
                     }
+
                     result += property.Name;
                 }
             }
+
             return result;
         }
+
     }
 }

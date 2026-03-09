@@ -1,137 +1,176 @@
-﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
+using System.Text;
+using SharedModel = Koretech.Kraken.KamlBoModel.Model;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
     internal class ServiceFileGenerator : FileGenerator
     {
-        private const string servicesPath = "";
+        private const string ServicesPath = "";
 
         public ServiceFileGenerator(DirectoryInfo outputRootDirectory) : base(outputRootDirectory)
         {
-            generatePath = servicesPath;
+            generatePath = ServicesPath;
         }
 
-        /// <summary>
-        /// Creates the subdirectory for storing entityBO files in a specific domain if it doesn't already exist.
-        /// </summary>
-        public void CreateDomainSubdirectory(KamlBoDomain domain)
+        protected override void DoGenerate(SharedModel.KamlBoDomain domain)
         {
-            outputRootDirectory.GetDirectories(servicesPath).Single().CreateSubdirectory(domain.Name);
+            ArgumentNullException.ThrowIfNull(domain);
+
+            SharedModel.KamlBoEntity primaryEntity = domain.GetEntity(domain.PrimaryEntityName)
+                ?? throw new InvalidOperationException(
+                    $"Could not find primary entity '{domain.PrimaryEntityName}' in domain '{domain.Name}'.");
+
+            ServiceFileModel fileModel = BuildServiceFileModel(domain, primaryEntity);
+            WriteServiceClassFile(fileModel);
+            WriteServiceInterfaceFile(fileModel);
         }
 
-        /// <summary>
-        /// Generates the two classes that make up a service based on a KAML BO specification.
-        /// </summary>
-        /// <param name="domain">The root of the KAML BO specification - the domain</param>
-        protected override void DoGenerate(KamlBoDomain domain)
-        {
-            string entityFullPath = Path.Combine(outputRootDirectory.FullName, servicesPath);
-
-            CreateServiceClassFile(domain, entityFullPath);
-            CreateServiceInterfaceFile(domain, entityFullPath);
-        }
-
-        /// <summary>
-        /// Generates a service class from a KAML BO specification.
-        /// </summary>
-        /// <param name="domain">model of the KAML BO specification root - the domain</param>
-        private void CreateServiceClassFile(KamlBoDomain domain, string entityFullPath)
+        private ServiceFileModel BuildServiceFileModel(SharedModel.KamlBoDomain domain, SharedModel.KamlBoEntity primaryEntity)
         {
             string domainName = domain.Name;
-            string domainPackageName = domainName + "s";
-            string primaryBusinessObjectName = domain.PrimaryEntityName;
-            string sourceFileName = Path.Combine(entityFullPath, $"{domainName}Service_Gen.cs");
-            {
-                File.Delete(sourceFileName);
-            }
-            var writer = File.CreateText(sourceFileName);
-            writer.Write(GetFileHeader());
-            writer.WriteLine();
-            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.BusinessObjects;");
-            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.Repositories;");
-            writer.WriteLine();
-            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}");
-            writer.WriteLine("{");
-            writer.WriteLine($"\tinternal partial class {domainName}Service : I{domainName}Service");
-            writer.WriteLine("\t{");
-            writer.WriteLine($"\t\tprivate {domainName}Repository _repository;");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic {domainName}Service({domainName}Repository repository)");
-            writer.WriteLine("\t\t{");
-            writer.WriteLine("\t\t\t_repository = repository;");
-            writer.WriteLine("\t\t}");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic async Task<IEnumerable<{primaryBusinessObjectName}>> GetAllAsync()");
-            writer.WriteLine("\t\t{");
-            writer.WriteLine("\t\t\treturn await _repository.GetAllAsync();");
-            writer.WriteLine("\t\t}");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic async Task<{primaryBusinessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, true)})");
-            writer.WriteLine("\t\t{");
-            writer.WriteLine($"\t\t\treturn await _repository.GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, false)});");
-            writer.WriteLine("\t\t}");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Insert({primaryBusinessObjectName} businessObject)");
-            writer.WriteLine("\t\t{");
-            writer.WriteLine("\t\t\t_repository.Insert(businessObject);");
-            writer.WriteLine("\t\t}");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Update({primaryBusinessObjectName} businessObject)");
-            writer.WriteLine("\t\t{");
-            writer.WriteLine("\t\t\t_repository.Update(businessObject);");
-            writer.WriteLine("\t\t}");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Delete({primaryBusinessObjectName} businessObject)");
-            writer.WriteLine("\t\t{");
-            writer.WriteLine("\t\t\t_repository.Delete(businessObject);");
-            writer.WriteLine("\t\t}");
-            writer.WriteLine("\t}");
-            writer.WriteLine("}");
+            string domainPackageName = $"{domainName}s";
+            string entityTypeName = $"{primaryEntity.Name}Entity";
+            string namespaceName = $"Koretech.Domains.{domainPackageName}";
+            string outputDirectoryPath = Path.Combine(outputRootDirectory.FullName, ServicesPath);
 
-            writer.Flush();
-            writer.Close();
-            Console.WriteLine($"File {sourceFileName} generated.");
+            return new ServiceFileModel(
+                domainName,
+                entityTypeName,
+                namespaceName,
+                Path.Combine(outputDirectoryPath, $"{domainName}Service_Gen.cs"),
+                Path.Combine(outputDirectoryPath, $"I{domainName}Service_Gen.cs"),
+                BuildUsingStatements(domainPackageName).ToList(),
+                primaryEntity.Key.AsParameters(true, entity: primaryEntity),
+                primaryEntity.Key.AsParameters(false));
         }
 
-        /// <summary>
-        /// Generates a service interface from a KAML BO specification.
-        /// This should only be called once per domain, for the root entity.
-        /// </summary>
-        /// <param name="domain">model of the KAML BO specification root - the domain</param>
-        private void CreateServiceInterfaceFile(KamlBoDomain domain, string entityFullPath)
+        private IEnumerable<string> BuildUsingStatements(string domainPackageName)
         {
-            string domainName = domain.Name;
-            string domainPackageName = domainName + "s";
-            string primaryBusinessObjectName = domain.PrimaryEntityName;
-            string sourceFileName = Path.Combine(entityFullPath, $"I{domainName}Service_Gen.cs");
+            return new[]
             {
-                File.Delete(sourceFileName);
-            }
-            var writer = File.CreateText(sourceFileName);
-            writer.Write(GetFileHeader());
-            writer.WriteLine();
-            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.BusinessObjects;");
-            writer.WriteLine($"using Koretech.Domains.{domainPackageName}.Repositories;");
-            writer.WriteLine();
-            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}");
-            writer.WriteLine("{");
-            writer.WriteLine($"\tpublic partial interface I{domainName}Service");
-            writer.WriteLine("\t{");
-            writer.WriteLine($"\t\tpublic Task<IEnumerable<{domainName}>> GetAllAsync();");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic Task<{primaryBusinessObjectName}?> GetByPrimaryKeyAsync({GetPrimaryKeyAsParameters(domain.PrimaryEntity, true)});");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Insert({primaryBusinessObjectName} businessObject);");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Update({primaryBusinessObjectName} businessObject);");
-            writer.WriteLine();
-            writer.WriteLine($"\t\tpublic void Delete({primaryBusinessObjectName} businessObject);");
-            writer.WriteLine("\t}");
-            writer.WriteLine("}");
-
-            writer.Flush();
-            writer.Close();
-            Console.WriteLine($"File {sourceFileName} generated.");
+                $"Koretech.Domains.{domainPackageName}.Entities",
+                $"Koretech.Domains.{domainPackageName}.Repositories"
+            };
         }
+
+        private void WriteServiceClassFile(ServiceFileModel fileModel)
+        {
+            if (File.Exists(fileModel.ClassOutputFilePath))
+            {
+                File.Delete(fileModel.ClassOutputFilePath);
+            }
+
+            string content = BuildServiceClassContent(fileModel);
+            File.WriteAllText(fileModel.ClassOutputFilePath, content);
+
+            Console.WriteLine($"File {fileModel.ClassOutputFilePath} generated.");
+        }
+
+        private void WriteServiceInterfaceFile(ServiceFileModel fileModel)
+        {
+            if (File.Exists(fileModel.InterfaceOutputFilePath))
+            {
+                File.Delete(fileModel.InterfaceOutputFilePath);
+            }
+
+            string content = BuildServiceInterfaceContent(fileModel);
+            File.WriteAllText(fileModel.InterfaceOutputFilePath, content);
+
+            Console.WriteLine($"File {fileModel.InterfaceOutputFilePath} generated.");
+        }
+
+        private string BuildServiceClassContent(ServiceFileModel fileModel)
+        {
+            StringBuilder content = new();
+            content.Append(GetFileHeader());
+            content.AppendLine();
+
+            AppendUsingStatements(content, fileModel);
+            content.AppendLine($"namespace {fileModel.NamespaceName}");
+            content.AppendLine("{");
+            content.AppendLine($"\tinternal partial class {fileModel.DomainName}Service : I{fileModel.DomainName}Service");
+            content.AppendLine("\t{");
+            content.AppendLine($"\t\tprivate readonly {fileModel.DomainName}Repository _repository;");
+            content.AppendLine();
+            content.AppendLine($"\t\tpublic {fileModel.DomainName}Service({fileModel.DomainName}Repository repository)");
+            content.AppendLine("\t\t{");
+            content.AppendLine("\t\t\t_repository = repository;");
+            content.AppendLine("\t\t}");
+            content.AppendLine();
+            content.AppendLine($"\t\tpublic async Task<IEnumerable<{fileModel.EntityTypeName}>> GetAllAsync()");
+            content.AppendLine("\t\t{");
+            content.AppendLine("\t\t\treturn await _repository.GetAllAsync();");
+            content.AppendLine("\t\t}");
+            content.AppendLine();
+            content.AppendLine($"\t\tpublic async Task<{fileModel.EntityTypeName}?> GetByPrimaryKeyAsync({fileModel.KeyParametersWithTypes})");
+            content.AppendLine("\t\t{");
+            content.AppendLine($"\t\t\treturn await _repository.GetByPrimaryKeyAsync({fileModel.KeyParameters});");
+            content.AppendLine("\t\t}");
+            content.AppendLine();
+            content.AppendLine($"\t\tpublic void Insert({fileModel.EntityTypeName} entity)");
+            content.AppendLine("\t\t{");
+            content.AppendLine("\t\t\t_repository.Insert(entity);");
+            content.AppendLine("\t\t}");
+            content.AppendLine();
+            content.AppendLine($"\t\tpublic void Update({fileModel.EntityTypeName} entity)");
+            content.AppendLine("\t\t{");
+            content.AppendLine("\t\t\t_repository.Update(entity);");
+            content.AppendLine("\t\t}");
+            content.AppendLine();
+            content.AppendLine($"\t\tpublic void Delete({fileModel.EntityTypeName} entity)");
+            content.AppendLine("\t\t{");
+            content.AppendLine("\t\t\t_repository.Delete(entity);");
+            content.AppendLine("\t\t}");
+            content.AppendLine("\t}");
+            content.AppendLine("}");
+
+            return content.ToString();
+        }
+
+        private string BuildServiceInterfaceContent(ServiceFileModel fileModel)
+        {
+            StringBuilder content = new();
+            content.Append(GetFileHeader());
+            content.AppendLine();
+
+            AppendUsingStatements(content, fileModel);
+            content.AppendLine($"namespace {fileModel.NamespaceName}");
+            content.AppendLine("{");
+            content.AppendLine($"\tpublic partial interface I{fileModel.DomainName}Service");
+            content.AppendLine("\t{");
+            content.AppendLine($"\t\tTask<IEnumerable<{fileModel.EntityTypeName}>> GetAllAsync();");
+            content.AppendLine();
+            content.AppendLine($"\t\tTask<{fileModel.EntityTypeName}?> GetByPrimaryKeyAsync({fileModel.KeyParametersWithTypes});");
+            content.AppendLine();
+            content.AppendLine($"\t\tvoid Insert({fileModel.EntityTypeName} entity);");
+            content.AppendLine();
+            content.AppendLine($"\t\tvoid Update({fileModel.EntityTypeName} entity);");
+            content.AppendLine();
+            content.AppendLine($"\t\tvoid Delete({fileModel.EntityTypeName} entity);");
+            content.AppendLine("\t}");
+            content.AppendLine("}");
+
+            return content.ToString();
+        }
+
+        private void AppendUsingStatements(StringBuilder content, ServiceFileModel fileModel)
+        {
+            foreach (string usingStatement in fileModel.UsingStatements)
+            {
+                content.AppendLine($"using {usingStatement};");
+            }
+
+            content.AppendLine();
+        }
+
+        private sealed record ServiceFileModel(
+            string DomainName,
+            string EntityTypeName,
+            string NamespaceName,
+            string ClassOutputFilePath,
+            string InterfaceOutputFilePath,
+            IReadOnlyList<string> UsingStatements,
+            string KeyParametersWithTypes,
+            string KeyParameters);
     }
 }

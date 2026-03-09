@@ -1,228 +1,235 @@
-﻿using Koretech.Kraken.KamlBoGen.KamlBoModel;
+using System.Text;
+using Koretech.Kraken.KamlBoGen.FileGenerators.Shared;
+using SharedModel = Koretech.Kraken.KamlBoModel.Model;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {
     internal class EntityFileGenerator : FileGenerator
     {
-        private const string entitiesPath = "Entities";
+        private const string EntitiesPath = "Entities";
+
+        private readonly PropertyTypeMapper _typeMapper;
+        private readonly CodeSnippetBuilder _snippets;
 
         public EntityFileGenerator(DirectoryInfo outputRootDirectory) : base(outputRootDirectory)
         {
-            generatePath = entitiesPath;            
+            generatePath = EntitiesPath;
+            _typeMapper = new PropertyTypeMapper();
+            _snippets = new CodeSnippetBuilder(_typeMapper);
         }
 
         /// <summary>
-        /// Creates the subdirectory for storing entityBO files in a specific domain if it doesn't already exist.
+        /// Creates the subdirectory for storing entity files in a specific domain if it doesn't already exist.
         /// </summary>
-        public void CreateDomainSubdirectory(KamlBoDomain domain)
+        public void CreateDomainSubdirectory(SharedModel.KamlBoDomain domain)
         {
-            outputRootDirectory.GetDirectories(entitiesPath).Single().CreateSubdirectory(domain.Name);
+            ArgumentNullException.ThrowIfNull(domain);
+            CreateDomainDirectory(domain.Name);
         }
 
-        /// <summary>
-        /// Generates an entity class from a KAML BO specification.
-        /// </summary>
-        /// <param name="domain">root of the model of the KAML BO specification, i.e. the domain</param>
-        protected override void DoGenerate(KamlBoDomain domain)
+        protected override void DoGenerate(SharedModel.KamlBoDomain domain)
         {
-            foreach (KamlBoEntity entity in domain.Entities) 
+            ArgumentNullException.ThrowIfNull(domain);
+
+            foreach (SharedModel.KamlBoEntity entity in domain.Entities)
             {
-                CreateEntityFile(entity);
+                EntityFileModel fileModel = BuildEntityFileModel(entity);
+                WriteEntityFile(fileModel);
             }
         }
 
-        /// <summary>
-        /// Generates an entity class from a KAML BO specification.
-        /// </summary>
-        /// <param name="entity">BO specification from the KAML BO</param>
-        private void CreateEntityFile(KamlBoEntity entity) 
-        { 
-            string entityName = entity.Name;
+        private EntityFileModel BuildEntityFileModel(SharedModel.KamlBoEntity entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
             string domainName = entity.Domain.Name;
-            string domainPackageName = domainName + "s";
-            string entityFullPath = Path.Combine(outputRootDirectory.FullName, entitiesPath);
-            string domainFullPath = Path.Combine(entityFullPath, domainName);
-            string sourceFileName = Path.Combine(domainFullPath, $"{entityName}Entity.cs");
+            string namespaceName = $"Koretech.Domains.{domainName}s.Entities";
+            string domainDirectoryPath = CreateDomainDirectory(domainName).FullName;
+            string outputFilePath = Path.Combine(domainDirectoryPath, $"{entity.Name}Entity.cs");
+
+            return new EntityFileModel(
+                entity.Name,
+                namespaceName,
+                outputFilePath,
+                BuildUsingStatements(entity).ToList(),
+                BuildPropertyModels(entity).ToList(),
+                BuildRelationModels(entity).ToList());
+        }
+
+        private IEnumerable<string> BuildUsingStatements(SharedModel.KamlBoEntity entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
+            return entity.Relations
+                .Where(r => r.IsCrossDomain && !string.IsNullOrWhiteSpace(r.TargetDomain))
+                .Select(r => $"Koretech.Domains.{r.TargetDomain}s.Entities")
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(ns => ns, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private IEnumerable<EntityPropertyModel> BuildPropertyModels(SharedModel.KamlBoEntity entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
+            foreach (SharedModel.KamlBoEntityProperty property in entity.Properties)
             {
-                File.Delete(sourceFileName);
+                string? defaultValue = property.IsPartitionProperty ? entity.PartitionValue : null;
+                string? comment = property.IsPartitionProperty ? "Partition property" : null;
+
+                yield return new EntityPropertyModel(
+                    property.Name ?? string.Empty,
+                    _snippets.PropertyDeclaration(property, defaultValue, comment));
             }
-            var writer = File.CreateText(sourceFileName);
-            writer.Write(GetFileHeader());
-            writer.WriteLine();
-            
-            // Usings
-            if (entity.HasCrossDomainRelationship) 
+        }
+
+        private IEnumerable<EntityRelationModel> BuildRelationModels(SharedModel.KamlBoEntity entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
+            foreach (SharedModel.KamlBoEntityRelation relation in entity.Relations)
             {
-                List<string> targetDomains = new();
-                foreach (KamlEntityRelation relation in entity.Relations.Where(r => r.IsCrossDomain))
-                {
-                    if (relation.TargetDomain != null && !targetDomains.Contains(relation.TargetDomain))
-                    {
-                        string targetDomainPackageName = relation.TargetDomain + "s";
-                        writer.WriteLine($"using Koretech.Domains.{targetDomainPackageName}.Entities;");
-                        targetDomains.Add(relation.TargetDomain);   
-                    }
-                }
-                writer.WriteLine();
+                string targetEntityType = $"{relation.TargetEntity}Entity";
+                string relationType = relation.IsToOwner ? "owner" : "child";
+                string relationComment = $"Navigation property to {relationType} {targetEntityType}";
+                bool isCollection = relation.IsToMany;
+
+                string declaration = isCollection
+                    ? _snippets.CollectionNavigation(targetEntityType, relation.Name, relationComment)
+                    : _snippets.ReferenceNavigation(targetEntityType, relation.Name, relationComment);
+
+                yield return new EntityRelationModel(
+                    relation.Name,
+                    declaration,
+                    relation.IsCrossDomain,
+                    isCollection,
+                    relation.IsToOwner);
             }
-            writer.WriteLine();
+        }
 
-            // Class
-            writer.WriteLine($"namespace Koretech.Domains.{domainPackageName}.Entities");
-            writer.WriteLine("{");
-            writer.WriteLine($"\tpublic class {entityName}Entity");
-            writer.WriteLine("\t{");
-            writer.WriteLine("\t");
+        private void WriteEntityFile(EntityFileModel fileModel)
+        {
+            ArgumentNullException.ThrowIfNull(fileModel);
 
-            // Properties
-            foreach (var property in entity.Properties)
+            if (File.Exists(fileModel.OutputFilePath))
             {
-                if (string.Equals(property.DataType, SqlType.Character.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    WriteStringProperty(property, writer);
-                }
-                else if (string.Equals(property.DataType, SqlType.DateTime.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    WriteDateTimeProperty(property, writer);
-                }
-                else if (string.Equals(property.DataType, SqlType.YesNo.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    WriteYesNoProperty(property, writer);
-                }
-                else if (string.Equals(property.DataType, SqlType.Integer.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    WriteIntegerProperty(property, writer);
-                }
-                else if (string.Equals(property.DataType, SqlType.UniqueIdentifier.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    WriteUuidProperty(property, writer);
-                }
-                else if (string.Equals(property.DataType, SqlType.Bytes.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    WriteBytesProperty(property, writer);
-                }
-                else if (string.Equals(property.DataType, SqlType.Byte.TypeName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    WriteByteProperty(property, writer);
-                }
-                else
-                {
-                    Console.WriteLine($"{entityName} has property {property.Name} with unknown type {property.DataType}");
-                }
-                writer.WriteLine();
-            }
-
-            // Relations
-            foreach (var rel in entity.Relations)
-            {
-                if (rel.IsToMany || rel.IsToOwnerMany)
-                {
-                    WriteToManyRelationProperty(rel, writer);
-                }
-                else
-                {
-                    WriteToOneRelationProperty(rel, writer);
-                }
-
-                // TODO: What else do we need to generate for inter-domain relationships?
-                if (!string.IsNullOrEmpty(rel.TargetDomain))
-                {
-                    writer.WriteLine("\t\t// This is an inter-domain relationship.");
-                }
-                writer.WriteLine();
+                File.Delete(fileModel.OutputFilePath);
             }
 
-            writer.WriteLine("\t}");
-            writer.WriteLine("}");
-            writer.Flush();
-            writer.Close();
-            Console.WriteLine($"File {sourceFileName} generated.");
+            string content = BuildEntityFileContent(fileModel);
+            File.WriteAllText(fileModel.OutputFilePath, content);
+
+            Console.WriteLine($"File {fileModel.OutputFilePath} generated.");
         }
 
-        private void WriteStringProperty(KamlEntityProperty property, StreamWriter writer)
+        private string BuildEntityFileContent(EntityFileModel fileModel)
         {
-            string nullableChar = property.IsRequired ? string.Empty : "?";
-            writer.Write($"\t\tpublic string{nullableChar} {property.Name}");
-            writer.Write(" { get; set; }");
-            if (property.IsRequired)
+            ArgumentNullException.ThrowIfNull(fileModel);
+
+            StringBuilder content = new();
+            content.Append(GetFileHeader());
+            content.AppendLine();
+
+            AppendUsingStatements(content, fileModel);
+            AppendNamespaceAndClassHeader(content, fileModel);
+            AppendPropertyDeclarations(content, fileModel);
+            AppendRelationDeclarations(content, fileModel);
+            AppendClassFooter(content);
+
+            return content.ToString();
+        }
+
+        private void AppendUsingStatements(StringBuilder content, EntityFileModel fileModel)
+        {
+            ArgumentNullException.ThrowIfNull(content);
+            ArgumentNullException.ThrowIfNull(fileModel);
+
+            foreach (string usingNamespace in fileModel.UsingStatements)
             {
-                writer.Write(" = string.Empty;");
+                content.AppendLine($"using {usingNamespace};");
             }
-            writer.WriteLine();
-        }
 
-        private void WriteDateTimeProperty(KamlEntityProperty property, StreamWriter writer)
-        {
-            string nullableChar = property.IsRequired ? string.Empty : "?";
-            writer.Write($"\t\tpublic DateTime{nullableChar} {property.Name}");
-            writer.Write(" { get; set; }");
-            if (property.IsRequired)
+            if (fileModel.UsingStatements.Count > 0)
             {
-                writer.Write(" = DateTime.Now;");
+                content.AppendLine();
             }
-            writer.WriteLine();
+
+            content.AppendLine();
         }
 
-        private void WriteIntegerProperty(KamlEntityProperty property, StreamWriter writer)
+        private void AppendNamespaceAndClassHeader(StringBuilder content, EntityFileModel fileModel)
         {
-            string nullableChar = property.IsRequired ? string.Empty : "?";
-            writer.Write($"\t\tpublic int{nullableChar} {property.Name}");
-            writer.Write(" { get; set; }");
-            writer.WriteLine();
+            ArgumentNullException.ThrowIfNull(content);
+            ArgumentNullException.ThrowIfNull(fileModel);
+
+            content.AppendLine($"namespace {fileModel.NamespaceName}");
+            content.AppendLine("{");
+            content.AppendLine($"\tpublic partial class {fileModel.EntityName}Entity");
+            content.AppendLine("\t{");
+            content.AppendLine("\t");
         }
 
-        private void WriteUuidProperty(KamlEntityProperty property, StreamWriter writer)
+        private void AppendPropertyDeclarations(StringBuilder content, EntityFileModel fileModel)
         {
-            string nullableChar = property.IsRequired ? string.Empty : "?";
-            writer.Write($"\t\tpublic Guid{nullableChar} {property.Name}");
-            writer.Write(" { get; set; }");
-            writer.WriteLine();
-        }
+            ArgumentNullException.ThrowIfNull(content);
+            ArgumentNullException.ThrowIfNull(fileModel);
 
-        private void WriteBytesProperty(KamlEntityProperty property, StreamWriter writer)
-        {
-            string nullableChar = property.IsRequired ? string.Empty : "?";
-            writer.Write($"\t\tpublic byte[]{nullableChar} {property.Name}");
-            writer.Write(" { get; set; }");
-            if (property.IsRequired)
+            foreach (EntityPropertyModel property in fileModel.Properties)
             {
-                writer.Write($" = new byte[{property.Length}];");
+                content.AppendLine(property.Declaration);
+                content.AppendLine();
             }
-            writer.WriteLine();
         }
 
-        private void WriteByteProperty(KamlEntityProperty property, StreamWriter writer)
+        private void AppendRelationDeclarations(StringBuilder content, EntityFileModel fileModel)
         {
-            string nullableChar = property.IsRequired ? string.Empty : "?";
-            writer.Write($"\t\tpublic byte{nullableChar} {property.Name}");
-            writer.Write(" { get; set; }");
-            writer.WriteLine();
+            ArgumentNullException.ThrowIfNull(content);
+            ArgumentNullException.ThrowIfNull(fileModel);
+
+            foreach (EntityRelationModel relation in fileModel.Relations)
+            {
+                if (relation.IsCrossDomain)
+                {
+                    content.AppendLine("\t\t// This is a cross-domain relationship.");
+                }
+
+                content.AppendLine(relation.Declaration);
+                content.AppendLine();
+            }
         }
 
-        private void WriteYesNoProperty(KamlEntityProperty property, StreamWriter writer)
+        private void AppendClassFooter(StringBuilder content)
         {
-            string nullableChar = property.IsRequired ? string.Empty : "?";
-            writer.Write($"\t\tpublic char{nullableChar} {property.Name}");
-            writer.Write(" { get; set; }");
-            writer.WriteLine();
+            ArgumentNullException.ThrowIfNull(content);
+
+            content.AppendLine("\t}");
+            content.AppendLine("}");
         }
 
-        private void WriteToManyRelationProperty(KamlEntityRelation relation, StreamWriter writer)
+        private DirectoryInfo CreateDomainDirectory(string domainName)
         {
-            string targetEntityType = $"{relation.TargetEntity}Entity";
-            string relationType = (relation.IsToOwnerOne || relation.IsToOwnerMany) ? "owner" : "child";
-            writer.Write($"\t\tpublic IList<{targetEntityType}> {relation.Name} {{ get; set; }}");
-            writer.Write($" = new List<{targetEntityType}>();  // Navigation property to {relationType} {targetEntityType}");
-            writer.WriteLine();
+            ArgumentException.ThrowIfNullOrWhiteSpace(domainName);
+
+            string entityDirectoryPath = Path.Combine(outputRootDirectory.FullName, EntitiesPath, domainName);
+            return Directory.CreateDirectory(entityDirectoryPath);
         }
 
-        private void WriteToOneRelationProperty(KamlEntityRelation relation, StreamWriter writer)
-        {
-            string targetEntityType = $"{relation.TargetEntity}Entity";
-            string relationType = (relation.IsToOwnerOne || relation.IsToOwnerMany) ? "owner" : "child";
-            writer.Write($"\t\tpublic {targetEntityType}? {relation.Name} {{ get; set; }} = null;"); // We make relationships nullable in entities to avoid compile errors in the generated code.
-            writer.Write($"  // Navigation property to {relationType} {targetEntityType}");  //TODO: How to initialize?  Can't use new() due to recursion.
-            writer.WriteLine();
-        }
+        private sealed record EntityFileModel(
+            string EntityName,
+            string NamespaceName,
+            string OutputFilePath,
+            IReadOnlyList<string> UsingStatements,
+            IReadOnlyList<EntityPropertyModel> Properties,
+            IReadOnlyList<EntityRelationModel> Relations);
+
+        private sealed record EntityPropertyModel(
+            string PropertyName,
+            string Declaration);
+
+        private sealed record EntityRelationModel(
+            string RelationName,
+            string Declaration,
+            bool IsCrossDomain,
+            bool IsCollection,
+            bool IsOwnerRelation);
     }
 }
