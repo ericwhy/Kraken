@@ -16,7 +16,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             ArgumentNullException.ThrowIfNull(domain);
 
-            SharedModel.KamlBoEntity primaryEntity = domain.GetEntity(domain.PrimaryEntityName)
+            SharedModel.KamlBoEntity primaryEntity = domain.PrimaryEntity
                 ?? throw new InvalidOperationException(
                     $"Could not find primary entity '{domain.PrimaryEntityName}' in domain '{domain.Name}'.");
 

@@ -45,7 +45,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             string domainName = entity.Domain.Name;
             string namespaceName = $"Koretech.Domains.{domainName}s.Entities";
             string domainDirectoryPath = CreateDomainDirectory(domainName).FullName;
-            string outputFilePath = Path.Combine(domainDirectoryPath, $"{entity.Name}Entity.cs");
+            string outputFilePath = Path.Combine(domainDirectoryPath, $"{entity.Name}Entity_Gen.cs");
 
             return new EntityFileModel(
                 entity.Name,

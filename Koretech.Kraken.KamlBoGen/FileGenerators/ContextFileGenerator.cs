@@ -26,7 +26,8 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             string primaryEntityName = domain.PrimaryEntityName;
             string namespaceName = $"Koretech.Domains.{domainPackageName}.Repositories";
             string outputFilePath = Path.Combine(outputRootDirectory.FullName, ContextsPath, $"{domain.Name}Context.cs");
-            List<RelationConfigurationModel> relationModels = BuildRelationModels(domain).ToList();
+            HashSet<string> rootOwnedEntityNames = GetRootOwnedEntityNames(domain);
+            List<RelationConfigurationModel> relationModels = BuildRelationModels(domain, rootOwnedEntityNames).ToList();
             HashSet<string> configuredNavigationKeys = relationModels
                 .SelectMany(r => r.ConfiguredNavigationKeys)
                 .ToHashSet(StringComparer.Ordinal);
@@ -41,6 +42,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 BuildConfigurationRegistrations(domain).ToList(),
                 BuildScopeFunctionModel(domain),
                 relationModels,
+                BuildQueryFilters(domain).ToList(),
                 BuildIgnoredNavigationModels(domain, configuredNavigationKeys).ToList());
         }
 
@@ -81,26 +83,33 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             return new ScopeFunctionModel(methodName, domain.ScopeFunction);
         }
 
-        private IEnumerable<RelationConfigurationModel> BuildRelationModels(SharedModel.KamlBoDomain domain)
+        private IEnumerable<RelationConfigurationModel> BuildRelationModels(
+            SharedModel.KamlBoDomain domain,
+            HashSet<string> rootOwnedEntityNames)
         {
             foreach (SharedModel.KamlBoEntity entity in domain.Entities)
             {
                 foreach (SharedModel.KamlBoEntityRelation relation in entity.OwnerRelations)
                 {
-                    yield return BuildRelationConfiguration(entity, relation);
+                    yield return BuildRelationConfiguration(domain, entity, relation, rootOwnedEntityNames);
                 }
             }
         }
 
         private RelationConfigurationModel BuildRelationConfiguration(
+            SharedModel.KamlBoDomain domain,
             SharedModel.KamlBoEntity entity,
-            SharedModel.KamlBoEntityRelation relation)
+            SharedModel.KamlBoEntityRelation relation,
+            HashSet<string> rootOwnedEntityNames)
         {
             string targetDomainName = relation.IsCrossDomain ? relation.TargetDomain : "the same";
             string relationshipBuilderMethod = "HasOne";
             string inverseBuilderMethod = relation.IsToOwnerOne ? "WithOne" : "WithMany";
             string inverseNavigation = GetInverseNavigationExpression(relation);
             string foreignKeyExpression = GetForeignKeyExpression(entity.Name, relation, relation.IsToOwnerOne);
+            string? deleteBehaviorLine = ShouldCascadeDelete(domain, entity, relation, rootOwnedEntityNames)
+                ? "\t\t\t\t.OnDelete(DeleteBehavior.Cascade);"
+                : null;
             List<string> configuredNavigationKeys = new() { GetNavigationKey(entity.Name, relation.Name) };
             if (relation.IsTargetLoaded && relation.InverseRelation != null)
             {
@@ -117,7 +126,74 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 $"\t\t\t\t.{relationshipBuilderMethod}(entity => entity.{relation.Name})",
                 $"\t\t\t\t.{inverseBuilderMethod}({inverseNavigation})",
                 foreignKeyExpression,
+                deleteBehaviorLine,
                 configuredNavigationKeys);
+        }
+
+        private static HashSet<string> GetRootOwnedEntityNames(SharedModel.KamlBoDomain domain)
+        {
+            SharedModel.KamlBoEntity rootEntity = domain.PrimaryEntity
+                ?? throw new InvalidOperationException(
+                    $"Could not find primary entity '{domain.PrimaryEntityName}' in domain '{domain.Name}'.");
+
+            HashSet<string> ownedEntityNames = new(StringComparer.OrdinalIgnoreCase);
+            Queue<SharedModel.KamlBoEntity> pendingEntities = new();
+
+            pendingEntities.Enqueue(rootEntity);
+            while (pendingEntities.Count > 0)
+            {
+                SharedModel.KamlBoEntity currentEntity = pendingEntities.Dequeue();
+                foreach (SharedModel.KamlBoEntityRelation childRelation in currentEntity.ChildRelations)
+                {
+                    if (!childRelation.IsTargetLoaded || childRelation.Target == null)
+                    {
+                        continue;
+                    }
+
+                    SharedModel.KamlBoEntity childEntity = childRelation.Target;
+                    if (!childEntity.Domain.Name.Equals(domain.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    if (childEntity.Name.Equals(rootEntity.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    if (ownedEntityNames.Add(childEntity.Name))
+                    {
+                        pendingEntities.Enqueue(childEntity);
+                    }
+                }
+            }
+
+            return ownedEntityNames;
+        }
+
+        private static bool ShouldCascadeDelete(
+            SharedModel.KamlBoDomain domain,
+            SharedModel.KamlBoEntity entity,
+            SharedModel.KamlBoEntityRelation relation,
+            HashSet<string> rootOwnedEntityNames)
+        {
+            if (relation.IsCrossDomain)
+            {
+                return false;
+            }
+
+            if (!rootOwnedEntityNames.Contains(entity.Name))
+            {
+                return false;
+            }
+
+            if (!relation.TargetEntity.Equals(domain.PrimaryEntityName, StringComparison.OrdinalIgnoreCase)
+                && !rootOwnedEntityNames.Contains(relation.TargetEntity))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private IEnumerable<IgnoredNavigationModel> BuildIgnoredNavigationModels(
@@ -134,6 +210,25 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                         yield return new IgnoredNavigationModel(entity.Name, relation.Name);
                     }
                 }
+            }
+        }
+
+        private IEnumerable<QueryFilterModel> BuildQueryFilters(SharedModel.KamlBoDomain domain)
+        {
+            foreach (SharedModel.KamlBoEntity entity in domain.Entities)
+            {
+                if (entity.CompositeEntity == null || entity.CompositeData?.Criteria == null)
+                {
+                    continue;
+                }
+
+                string columnName = entity.CompositeData.Criteria.Column;
+                string columnValue = entity.CompositeData.Criteria.Value;
+                string propertyName = entity.CompositeEntity.GetPropertyForColumn(columnName)?.Name
+                    ?? throw new InvalidOperationException(
+                        $"Could not find a property for composite criteria column '{columnName}' on entity '{entity.CompositeEntity.Name}'.");
+
+                yield return new QueryFilterModel(entity.CompositeEntity.Name, propertyName, columnValue);
             }
         }
 
@@ -159,14 +254,14 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             {
                 string foreignKeyProperty = relation.KeyMap.Keys.First();
                 return isOneToOne
-                    ? $"\t\t\t\t.HasForeignKey<{entityName}Entity>(entity => entity.{foreignKeyProperty});"
-                    : $"\t\t\t\t.HasForeignKey(entity => entity.{foreignKeyProperty});";
+                    ? $"\t\t\t\t.HasForeignKey<{entityName}Entity>(entity => entity.{foreignKeyProperty})"
+                    : $"\t\t\t\t.HasForeignKey(entity => entity.{foreignKeyProperty})";
             }
 
             string keyList = string.Join(", ", relation.KeyMap.Keys.Select(key => $"entity.{key}"));
             return isOneToOne
-                ? $"\t\t\t\t.HasForeignKey<{entityName}Entity>(entity => new {{ {keyList} }});"
-                : $"\t\t\t\t.HasForeignKey(entity => new {{ {keyList} }});";
+                ? $"\t\t\t\t.HasForeignKey<{entityName}Entity>(entity => new {{ {keyList} }})"
+                : $"\t\t\t\t.HasForeignKey(entity => new {{ {keyList} }})";
         }
 
         private void WriteContextFile(ContextFileModel fileModel)
@@ -281,7 +376,26 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 content.AppendLine(relation.EntityLine);
                 content.AppendLine(relation.HasLine);
                 content.AppendLine(relation.WithLine);
-                content.AppendLine(relation.ForeignKeyLine);
+                if (!string.IsNullOrWhiteSpace(relation.DeleteBehaviorLine))
+                {
+                    content.AppendLine(relation.ForeignKeyLine);
+                    content.AppendLine(relation.DeleteBehaviorLine);
+                }
+                else
+                {
+                    content.AppendLine(relation.ForeignKeyLine + ";");
+                }
+            }
+
+            if (fileModel.QueryFilters.Count > 0)
+            {
+                content.AppendLine();
+                content.AppendLine("\t\t\t// Apply query filters needed for composite entity splits.");
+                foreach (QueryFilterModel queryFilter in fileModel.QueryFilters)
+                {
+                    content.AppendLine($"\t\t\tmodelBuilder.Entity<{queryFilter.EntityName}Entity>()");
+                    content.AppendLine($"\t\t\t\t.HasQueryFilter(e => e.{queryFilter.PropertyName} == {queryFilter.ValueLiteral});");
+                }
             }
 
             if (fileModel.IgnoredNavigations.Count > 0)
@@ -319,6 +433,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             IReadOnlyList<string> ConfigurationRegistrations,
             ScopeFunctionModel? ScopeFunction,
             IReadOnlyList<RelationConfigurationModel> Relations,
+            IReadOnlyList<QueryFilterModel> QueryFilters,
             IReadOnlyList<IgnoredNavigationModel> IgnoredNavigations);
 
         private sealed record DbSetModel(string EntityName, string PropertyName);
@@ -335,7 +450,13 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             string HasLine,
             string WithLine,
             string ForeignKeyLine,
+            string? DeleteBehaviorLine,
             IReadOnlyList<string> ConfiguredNavigationKeys);
+
+        private sealed record QueryFilterModel(
+            string EntityName,
+            string PropertyName,
+            string ValueLiteral);
 
         private sealed record IgnoredNavigationModel(
             string EntityName,

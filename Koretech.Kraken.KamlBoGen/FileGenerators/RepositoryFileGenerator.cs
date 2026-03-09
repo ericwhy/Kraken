@@ -16,7 +16,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
         {
             ArgumentNullException.ThrowIfNull(domain);
 
-            SharedModel.KamlBoEntity primaryEntity = domain.GetEntity(domain.PrimaryEntityName)
+            SharedModel.KamlBoEntity primaryEntity = domain.PrimaryEntity
                 ?? throw new InvalidOperationException(
                     $"Could not find primary entity '{domain.PrimaryEntityName}' in domain '{domain.Name}'.");
 
@@ -39,7 +39,8 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 outputFilePath,
                 BuildUsingStatements(domainPackageName).ToList(),
                 primaryEntity.Key.AsParameters(true, entity: primaryEntity),
-                primaryEntity.Key.AsCondition());
+                primaryEntity.Key.AsCondition(),
+                BuildIncludeExpressions(primaryEntity).ToList());
         }
 
         private IEnumerable<string> BuildUsingStatements(string domainPackageName)
@@ -50,6 +51,24 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
                 $"Koretech.Domains.{domainPackageName}.Entities",
                 "Microsoft.EntityFrameworkCore"
             };
+        }
+
+        private IEnumerable<string> BuildIncludeExpressions(SharedModel.KamlBoEntity primaryEntity)
+        {
+            ArgumentNullException.ThrowIfNull(primaryEntity);
+
+            if (primaryEntity.CompositeEntity == null)
+            {
+                yield break;
+            }
+
+            foreach (SharedModel.KamlBoEntityRelation relation in primaryEntity.ChildRelations)
+            {
+                if (relation.TargetEntity.Equals(primaryEntity.CompositeEntity.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    yield return relation.Name;
+                }
+            }
         }
 
         private void WriteRepositoryFile(RepositoryFileModel fileModel)
@@ -108,6 +127,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             content.AppendLine($"\t\tpublic async Task<IEnumerable<{fileModel.EntityTypeName}>> GetAllAsync()");
             content.AppendLine("\t\t{");
             content.AppendLine("\t\t\treturn await FindAll()");
+            AppendIncludeExpressions(content, fileModel);
             content.AppendLine("\t\t\t\t.ToListAsync();");
             content.AppendLine("\t\t}");
             content.AppendLine();
@@ -118,6 +138,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             content.AppendLine($"\t\tpublic async Task<{fileModel.EntityTypeName}?> GetByPrimaryKeyAsync({fileModel.KeyParametersWithTypes})");
             content.AppendLine("\t\t{");
             content.AppendLine($"\t\t\treturn await FindByCondition({fileModel.KeyCondition})");
+            AppendIncludeExpressions(content, fileModel);
             content.AppendLine("\t\t\t\t.FirstOrDefaultAsync();");
             content.AppendLine("\t\t}");
             content.AppendLine();
@@ -148,6 +169,14 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             content.AppendLine("}");
         }
 
+        private void AppendIncludeExpressions(StringBuilder content, RepositoryFileModel fileModel)
+        {
+            foreach (string includeExpression in fileModel.IncludeExpressions)
+            {
+                content.AppendLine($"\t\t\t\t.Include(entity => entity.{includeExpression})");
+            }
+        }
+
         private sealed record RepositoryFileModel(
             string DomainName,
             string EntityTypeName,
@@ -155,6 +184,7 @@ namespace Koretech.Kraken.KamlBoGen.FileGenerators
             string OutputFilePath,
             IReadOnlyList<string> UsingStatements,
             string KeyParametersWithTypes,
-            string KeyCondition);
+            string KeyCondition,
+            IReadOnlyList<string> IncludeExpressions);
     }
 }
