@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\KommerceServer-Import\Koretech.Kraken.KamlBoModel\Koretech.Kraken.KamlBoModel.csproj" />
+    <ProjectReference Include="..\..\KommerceServer-Import\Koretech.Tools.KamlBoModel\Koretech.Tools.KamlBoModel.csproj" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 

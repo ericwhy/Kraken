@@ -1,5 +1,5 @@
 using System.Text;
-using Koretech.Kraken.KamlBoModel.Model;
+using Koretech.Tools.KamlBoModel.Model;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators.Shared
 {

@@ -1,4 +1,4 @@
-using SharedModel = Koretech.Kraken.KamlBoModel.Model;
+using SharedModel = Koretech.Tools.KamlBoModel.Model;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {

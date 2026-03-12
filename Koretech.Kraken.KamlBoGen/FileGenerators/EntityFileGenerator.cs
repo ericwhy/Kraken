@@ -1,6 +1,6 @@
 using System.Text;
 using Koretech.Kraken.KamlBoGen.FileGenerators.Shared;
-using SharedModel = Koretech.Kraken.KamlBoModel.Model;
+using SharedModel = Koretech.Tools.KamlBoModel.Model;
 
 namespace Koretech.Kraken.KamlBoGen.FileGenerators
 {

@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.3.11512.155 d18.3
@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Test.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koretech.Kraken.KamlBoGen.Test", "Koretech.Kraken.KamlBoGen.Test\Koretech.Kraken.KamlBoGen.Test.csproj", "{F08E4730-0E69-4C87-87EA-956D1722E4DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koretech.Kraken.KamlBoModel", "..\KommerceServer-Import\Koretech.Kraken.KamlBoModel\Koretech.Kraken.KamlBoModel.csproj", "{91D192B6-10E7-4988-A71D-C10FE544AA35}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koretech.Tools.KamlBoModel", "..\KommerceServer-Import\Koretech.Tools.KamlBoModel\Koretech.Tools.KamlBoModel.csproj", "{91D192B6-10E7-4988-A71D-C10FE544AA35}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koretech.Tools.KamlBo2KrakenBo", "..\KommerceServer-Import\Koretech.Tools.KamlBo2KrakenBo\Koretech.Tools.KamlBo2KrakenBo.csproj", "{75824C97-99D6-4FB9-93DA-41C4109691E3}"
 EndProject

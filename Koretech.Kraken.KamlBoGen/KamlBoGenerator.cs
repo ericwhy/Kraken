@@ -1,6 +1,6 @@
 using Koretech.Kraken.KamlBoGen.FileGenerators;
-using Koretech.Kraken.KamlBoModel.Model;
-using Koretech.Kraken.KamlBoModel.Utility;
+using Koretech.Tools.KamlBoModel.Model;
+using Koretech.Tools.KamlBoModel.Utility;
 
 namespace Koretech.Kraken.KamlBoGen
 {
@@ -52,7 +52,7 @@ namespace Koretech.Kraken.KamlBoGen
                     $"Unable to load required KAMLBO dependencies for '{SourceKamlBo.Name}'. Missing business objects: {missingNames}.");
             }
 
-            var sharedModel = global::Koretech.Kraken.KamlBoModel.Model.KamlBoModel.ParseFromKamlBoFiles(SourceKamlBo.Directory!, kamlBoFiles);
+            var sharedModel = global::Koretech.Tools.KamlBoModel.Model.KamlBoModel.ParseFromKamlBoFiles(SourceKamlBo.Directory!, kamlBoFiles);
             sharedModel.ExpandCompositeTypes();
             KamlBoDomain sharedDomain = sharedModel.GetDomain(domainName)
                 ?? throw new InvalidOperationException(
