@@ -25,7 +25,7 @@ We wish to know what capabilities are in each project's code generator and persi
 
 ## File Locations
 - Base path to repositories: 'C:\Dev\Source\repos\' (All paths below are relative to this base path)
-- Kraken code generator: `Kraken\Koretech.Kraken.KamlBoGen`
+- Kraken code generator: `Kraken\Koretech.Tools.KrakenGenerator`
 - Kraken kamlbo samples: 'Kraken\Koretech.Kraken.Data'
 - Kraken persistence layer: `KommerceServer-Kraken\Koretech.Domains`
 - Importer code generator: `KommerceServer-Import\Koretech.Importer.Tools`

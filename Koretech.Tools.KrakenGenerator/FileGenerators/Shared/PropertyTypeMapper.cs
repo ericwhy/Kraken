@@ -1,6 +1,6 @@
 using Koretech.Tools.KamlBoModel.Model;
 
-namespace Koretech.Kraken.KamlBoGen.FileGenerators.Shared
+namespace Koretech.Tools.KrakenGenerator.FileGenerators.Shared
 {
     /// <summary>
     /// Maps KAML BO property metadata to CLR and SQL generation types.

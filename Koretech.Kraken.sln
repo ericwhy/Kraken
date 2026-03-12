@@ -7,13 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data", "Kor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Console", "Koretech.Kraken.Data.Console\Koretech.Kraken.Data.Console.csproj", "{353651BA-3E81-4B59-93AF-B7156B23233E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.KamlBoGen", "Koretech.Kraken.KamlBoGen\Koretech.Kraken.KamlBoGen.csproj", "{D838CFF5-5B2B-4C28-B672-45252779BD2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Tools.KrakenGenerator", "Koretech.Tools.KrakenGenerator\Koretech.Tools.KrakenGenerator.csproj", "{D838CFF5-5B2B-4C28-B672-45252779BD2F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Test", "Koretech.Kraken.Data.Test\Koretech.Kraken.Data.Test.csproj", "{004280AE-9892-4501-A451-9793D0F39BCD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koretech.Kraken.Data.Test.Console", "Koretech.Kraken.Data.Test.Console\Koretech.Kraken.Data.Test.Console.csproj", "{39CC84B9-94FB-4F37-A1BE-8D50F0E7C605}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koretech.Kraken.KamlBoGen.Test", "Koretech.Kraken.KamlBoGen.Test\Koretech.Kraken.KamlBoGen.Test.csproj", "{F08E4730-0E69-4C87-87EA-956D1722E4DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koretech.Tools.KrakenGenerator.Test", "Koretech.Tools.KrakenGenerator.Test\Koretech.Tools.KrakenGenerator.Test.csproj", "{F08E4730-0E69-4C87-87EA-956D1722E4DE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koretech.Tools.KamlBoModel", "..\KommerceServer-Import\Koretech.Tools.KamlBoModel\Koretech.Tools.KamlBoModel.csproj", "{91D192B6-10E7-4988-A71D-C10FE544AA35}"
 EndProject

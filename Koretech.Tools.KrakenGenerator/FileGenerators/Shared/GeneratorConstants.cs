@@ -1,4 +1,4 @@
-namespace Koretech.Kraken.KamlBoGen.FileGenerators.Shared
+namespace Koretech.Tools.KrakenGenerator.FileGenerators.Shared
 {
     /// <summary>
     /// Shared constants for Kraken code generation helpers.

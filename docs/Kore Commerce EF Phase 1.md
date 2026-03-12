@@ -18,7 +18,7 @@ It is expected that the approach to Phase 1 will involve the use of Kraken kamlb
 Examine the code in these locations in order to analyze it and posit possible approaches for Phase 1.
 
  - - Base path to repositories: 'C:\Dev\Source\repos\' (All paths below are relative to this base path)
-- Kraken code generator: `Kraken\Koretech.Kraken.KamlBoGen`
+- Kraken code generator: `Kraken\Koretech.Tools.KrakenGenerator`
 - Kraken kamlbo samples: 'Kraken\Koretech.Kraken.Data'
 - Kraken persistence layer: `KommerceServer-Kraken\Koretech.Domains`
 - Existing Kore Commerce business objects: `KommerceServer-Kraken\Koretech.KommerceServer\BusinessObjects`
@@ -503,4 +503,3 @@ If there's significant new feature development happening in parallel, consider:
 4. Over time, the codebase naturally shifts to Kraken architecture
 
 This hybrid approach ensures new code is clean while existing code is stabilized.
-

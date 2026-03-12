@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Koretech.Kraken.KamlBoGen
+namespace Koretech.Tools.KrakenGenerator
 {
     internal class SqlType
     {

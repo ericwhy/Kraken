@@ -1,7 +1,7 @@
 using System.Text;
 using Koretech.Tools.KamlBoModel.Model;
 
-namespace Koretech.Kraken.KamlBoGen.FileGenerators.Shared
+namespace Koretech.Tools.KrakenGenerator.FileGenerators.Shared
 {
     /// <summary>
     /// Provides reusable code-generation snippets for Kraken generators.

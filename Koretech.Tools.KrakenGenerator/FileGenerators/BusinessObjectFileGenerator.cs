@@ -1,6 +1,6 @@
 using SharedModel = Koretech.Tools.KamlBoModel.Model;
 
-namespace Koretech.Kraken.KamlBoGen.FileGenerators
+namespace Koretech.Tools.KrakenGenerator.FileGenerators
 {
     internal class BusinessObjectFileGenerator : FileGenerator
     {

@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Koretech.Kraken.KamlBoGen/bin/Debug/net6.0/Koretech.Kraken.KamlBoGen.dll",
+            "program": "${workspaceFolder}/Koretech.Tools.KrakenGenerator/bin/Debug/net8.0/Koretech.Tools.KrakenGenerator.dll",
             "args": ["--source-file", "../Koretech.Kraken.Data/KsUser.kamlbo", "-o", "../Gen" ],
-            "cwd": "${workspaceFolder}/Koretech.Kraken.KamlBoGen",
+            "cwd": "${workspaceFolder}/Koretech.Tools.KrakenGenerator",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

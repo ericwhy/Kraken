@@ -3,16 +3,16 @@ Repository assistant guidelines
 These rules are the canonical instructions the automated assistant and contributors should follow when modifying this repository. Keep changes explicit and small; enforce with CI where possible.
 
 1. Project & file layout
-   - For this repository, the main codebase is in the `Koretech.Kraken.KamlBoGen` project (aka 'tools project').
+   - For this repository, the main codebase is in the `Koretech.Tools.KrakenGenerator` project (aka 'tools project').
    - This project implements a code generator that produces source files for the product project.
    - The product project is located outside this repository, in a repository at C:\Dev\Source\Repos\KommerceServer-Kraken, and is called Koretech.KommerceServer.
    - Metadata describing the business objects from the proudct project are located in this repo in the Koretech.Kraken.Data project.
    - Generated code from the tools project is placed in the `Gen` folder under the repo root.  The tools project should not contain any generated code itself, but may contain templates and generator logic.
-   - Keep tools code under `Koretech.Kraken.KamlBoGen/` and tests under `Koretech.Kraken.KamlBoGen.Test/`.
+   - Keep tools code under `Koretech.Tools.KrakenGenerator/` and tests under `Koretech.Tools.KrakenGenerator.Test/`.
 
 2. Tests
-   - When creating unit or integration tests for the tools project, always create them in the separate test project named `Koretech.Kraken.KamlBoGen.Test` (aka 'test project').
-   - Do not create the `Koretech.Kraken.KamlBoGen.Test` project.  Use the existing project.
+   - When creating unit or integration tests for the tools project, always create them in the separate test project named `Koretech.Tools.KrakenGenerator.Test` (aka 'test project').
+   - Do not create the `Koretech.Tools.KrakenGenerator.Test` project.  Use the existing project.
    - The test project must reference the tools project via a `<ProjectReference/>` and include only test packages (NUnit/Moq/Test SDK, etc.).
    - Within the test project, place tests in the Tests/ folder, and oranize test classes within that folder using the E2E, Integration, Unit subfolders as appropriate.
    - Use NUnit for tests and Moq for mocking unless a specific test requires otherwise.

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Koretech.Kraken.KamlBoGen": {
+    "Koretech.Tools.KrakenGenerator": {
       "commandName": "Project",
       "commandLineArgs": "--source-file ../../../../Koretech.Kraken.Data/KsPage.kamlbo --output-directory ../../../../Gen"
     }

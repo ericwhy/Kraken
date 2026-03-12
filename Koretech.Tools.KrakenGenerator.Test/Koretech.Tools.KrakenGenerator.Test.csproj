@@ -20,4 +20,8 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Koretech.Tools.KrakenGenerator\Koretech.Tools.KrakenGenerator.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,12 +1,12 @@
-using Koretech.Kraken.KamlBoGen.FileGenerators;
+using Koretech.Tools.KrakenGenerator.FileGenerators;
 using Koretech.Tools.KamlBoModel.Model;
 using Koretech.Tools.KamlBoModel.Utility;
 
-namespace Koretech.Kraken.KamlBoGen
+namespace Koretech.Tools.KrakenGenerator
 {
-    public class KamlBoGen
+    public class KrakenGenerator
     {
-        public KamlBoGen(FileInfo source, DirectoryInfo outPath)
+        public KrakenGenerator(FileInfo source, DirectoryInfo outPath)
         {
             SourceKamlBo = source;
             OutputRoot = outPath;

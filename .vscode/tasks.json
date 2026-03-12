@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Koretech.Kraken.KamlBoGen/Koretech.Kraken.KamlBoGen.csproj",
+                "${workspaceFolder}/Koretech.Tools.KrakenGenerator/Koretech.Tools.KrakenGenerator.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Koretech.Kraken.KamlBoGen/Koretech.Kraken.KamlBoGen.csproj",
+                "${workspaceFolder}/Koretech.Tools.KrakenGenerator/Koretech.Tools.KrakenGenerator.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Koretech.Kraken.KamlBoGen/Koretech.Kraken.KamlBoGen.csproj"
+                "${workspaceFolder}/Koretech.Tools.KrakenGenerator/Koretech.Tools.KrakenGenerator.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

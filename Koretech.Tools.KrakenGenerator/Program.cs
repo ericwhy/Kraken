@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
 
-namespace Koretech.Kraken.Kaml;
+namespace Koretech.Tools.KrakenGenerator;
 class Program
 {
     static async Task Main(string[] args)
@@ -14,7 +14,7 @@ class Program
         outputDirectoryOption.IsRequired = false;
         outputDirectoryOption.Description = "The directory to write the generated files to";
 
-        var rootCommand = new RootCommand("KamlBoGen");
+        var rootCommand = new RootCommand("KrakenGenerator");
         rootCommand.AddOption(kamlSourceOption);
         rootCommand.AddOption(outputDirectoryOption);
 
@@ -40,7 +40,7 @@ class Program
                 Console.WriteLine("Output directory does not exist!");
             }
         }
-        KamlBoGen.KamlBoGen gen = new(kamlSource, outputDirectory);
+        KrakenGenerator gen = new(kamlSource, outputDirectory);
         gen.Generate();
     }
 }

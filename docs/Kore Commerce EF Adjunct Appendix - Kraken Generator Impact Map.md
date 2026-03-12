@@ -4,7 +4,7 @@
 
 This appendix maps EF6 -> EF Core migration impacts to specific Kraken generator files and proposes a generator architecture that minimizes rework.
 
-Base project analyzed: `Koretech.Kraken.KamlBoGen`
+Base project analyzed: `Koretech.Tools.KrakenGenerator`
 
 ---
 
@@ -216,7 +216,7 @@ Changes:
 ## WP5: Regression harness for generated output
 
 Add test project (recommended):
-- `Koretech.Kraken.KamlBoGen.Tests`
+- `Koretech.Tools.KrakenGenerator.Tests`
 
 Tests:
 1. Golden-file tests for generated source per provider.

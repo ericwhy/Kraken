@@ -30,7 +30,7 @@ This document describes the Kraken and KamlBoGen projects, their purpose and arc
 ## 1. Purpose and Scope
    - The Kraken project will include a new code generator that will generate BOs and EF-based data access layers (DALs) based on a newer version of the existing KAMLBO metadata.
    - The purpose of the KamlBoGen project is to implement this code generator.
-   - The code generator is implemented in the Koretech.Kraken.KamlBoGen project in the Kraken repository.
+   - The code generator is implemented in the Koretech.Tools.KrakenGenerator project in the Kraken repository.
    - The scope of this project includes:
      - Ingesting KAMLBO files in the new format (Kraken KAMLBO).
      - Generating BOs and EF-based DALs that are functionally equivalent to those currently in use in Kore Commerce, with the same properties and behavior.

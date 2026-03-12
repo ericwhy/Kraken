@@ -1,5 +1,5 @@
-namespace Koretech.Kraken.Kaml {
-    public static class KamlBoExtensions {
+namespace Koretech.Tools.KrakenGenerator {
+    public static class KrakenGeneratorExtensions {
         public static int AsInteger(this string value) {
             int outValue;
             if(int.TryParse(value, out outValue))

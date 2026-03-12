@@ -1,8 +1,8 @@
 using System.Text;
-using Koretech.Kraken.KamlBoGen.FileGenerators.Shared;
+using Koretech.Tools.KrakenGenerator.FileGenerators.Shared;
 using SharedModel = Koretech.Tools.KamlBoModel.Model;
 
-namespace Koretech.Kraken.KamlBoGen.FileGenerators
+namespace Koretech.Tools.KrakenGenerator.FileGenerators
 {
     internal class EntityFileGenerator : FileGenerator
     {
